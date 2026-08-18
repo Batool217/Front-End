@@ -16,7 +16,6 @@ function App() {
         <Route path="/Register" element={<Register />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
-
         <Route path="/Home" element={<Home />} />
       </Routes>
     </BrowserRouter>
@@ -24,3 +23,4 @@ function App() {
 }
 
 export default App;
+

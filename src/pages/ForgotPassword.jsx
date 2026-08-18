@@ -10,16 +10,25 @@ function ForgotPassword() {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // 1. فحص إرسال الـ OTP
   const sendOtp = async (e) => {
     e.preventDefault();
 
-    setError("");
+    setErrors({});
 
-    if (!email.trim()) {
-      setError("Email is required");
+    const trimmedEmail = email.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!trimmedEmail) {
+      setErrors({ email: "Email address is required" });
+      return;
+    }
+
+    if (!emailRegex.test(trimmedEmail)) {
+      setErrors({ email: "Enter a valid email address" });
       return;
     }
 
@@ -34,7 +43,7 @@ function ForgotPassword() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email,
+            email: trimmedEmail,
           }),
         }
       );
@@ -42,38 +51,52 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(
-          data.message || "Unable to send OTP"
-        );
+        setErrors({
+          general: data.message || "Unable to send OTP",
+        });
         return;
       }
 
       setStep(2);
 
     } catch (error) {
-      setError("Unable to connect to the server");
+      setErrors({ general: "Unable to connect to the server" });
     } finally {
       setLoading(false);
     }
   };
 
+  // 2. فحص إعادة تعيين كلمة المرور
   const resetPassword = async (e) => {
     e.preventDefault();
 
-    setError("");
+    setErrors({});
 
-    if (!otp.trim()) {
-      setError("OTP is required");
-      return;
+    const newErr = {};
+    const trimmedOtp = otp.trim();
+
+    if (!trimmedOtp) {
+      newErr.otp = "OTP code is required";
+    } else if (!/^\d{4,8}$/.test(trimmedOtp)) {
+      newErr.otp = "OTP must be numeric (4-8 digits)";
     }
 
     if (!newPassword) {
-      setError("New password is required");
-      return;
+      newErr.newPassword = "New password is required";
+    } else if (newPassword.length < 8) {
+      newErr.newPassword = "Password must be at least 8 characters long";
+    } else if (!/[A-Z]/.test(newPassword)) {
+      newErr.newPassword = "Password must include at least one uppercase letter (A-Z)";
+    } else if (!/[a-z]/.test(newPassword)) {
+      newErr.newPassword = "Password must include at least one lowercase letter (a-z)";
+    } else if (!/[0-9]/.test(newPassword)) {
+      newErr.newPassword = "Password must include at least one number (0-9)";
+    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+      newErr.newPassword = "Password must include at least one special character (!@#$%^&*)";
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+    if (Object.keys(newErr).length > 0) {
+      setErrors(newErr);
       return;
     }
 
@@ -89,7 +112,7 @@ function ForgotPassword() {
           },
           body: JSON.stringify({
             email,
-            otp,
+            otp: trimmedOtp,
             newPassword,
           }),
         }
@@ -98,17 +121,17 @@ function ForgotPassword() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(
-          data.message || "Invalid OTP or password"
-        );
+        setErrors({
+          general: data.message || "Invalid OTP or password",
+        });
         return;
       }
 
-      // Password successfully changed
+      // النجاح والتوجيه للوجن
       navigate("/login");
 
     } catch (error) {
-      setError("Unable to connect to the server");
+      setErrors({ general: "Unable to connect to the server" });
     } finally {
       setLoading(false);
     }
@@ -126,6 +149,10 @@ function ForgotPassword() {
               Enter your email and we'll send you an OTP
             </p>
 
+            {errors.general && (
+              <div className="general-error">{errors.general}</div>
+            )}
+
             <form onSubmit={sendOtp}>
 
               <div className="form-group">
@@ -137,13 +164,13 @@ function ForgotPassword() {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setError("");
+                    setErrors({});
                   }}
                 />
 
-                {error && (
+                {errors.email && (
                   <span className="error">
-                    {error}
+                    {errors.email}
                   </span>
                 )}
               </div>
@@ -173,20 +200,28 @@ function ForgotPassword() {
               Enter the OTP sent to your email
             </p>
 
+            {errors.general && (
+              <div className="general-error">{errors.general}</div>
+            )}
+
             <form onSubmit={resetPassword}>
 
               <div className="form-group">
-                <label>OTP</label>
+                <label>OTP Code</label>
 
                 <input
                   type="text"
-                  placeholder="Enter OTP"
+                  placeholder="Enter OTP code"
                   value={otp}
                   onChange={(e) => {
                     setOtp(e.target.value);
-                    setError("");
+                    setErrors({});
                   }}
                 />
+
+                {errors.otp && (
+                  <span className="error">{errors.otp}</span>
+                )}
               </div>
 
               <div className="form-group">
@@ -194,20 +229,18 @@ function ForgotPassword() {
 
                 <input
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder="At least 8 chars (A-z, 0-9, !@#)"
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value);
-                    setError("");
+                    setErrors({});
                   }}
                 />
-              </div>
 
-              {error && (
-                <span className="error">
-                  {error}
-                </span>
-              )}
+                {errors.newPassword && (
+                  <span className="error">{errors.newPassword}</span>
+                )}
+              </div>
 
               <button
                 className="primary-button"
@@ -235,4 +268,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword;
+export default ForgotPassword;
