@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -26,7 +28,6 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
     if (!form.email.trim()) {
@@ -42,64 +43,36 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-
-        /*
-          Backend should ideally return something like:
-
-          {
-            "message": "Email is not registered",
-            "code": "EMAIL_NOT_REGISTERED"
-          }
-
-          OR
-
-          {
-            "message": "Invalid email or password",
-            "code": "INVALID_CREDENTIALS"
-          }
-        */
-
         if (
-          data.code === "EMAIL_NOT_REGISTERED" ||
-          data.error === "EMAIL_NOT_REGISTERED"
+            data.code === "EMAIL_NOT_REGISTERED" ||
+            data.error === "EMAIL_NOT_REGISTERED"
         ) {
-          navigate("/register");
+          navigate("/Register");
           return;
         }
 
-        setError(
-          data.message || "Invalid email or password"
-        );
-
+        setError(data.message || "Invalid email or password");
         return;
       }
 
-      // Save authentication information
       if (data.token) {
-        if (form.rememberMe) {
-          localStorage.setItem("token", data.token);
-        } else {
-          sessionStorage.setItem("token", data.token);
-        }
+        const userData = data.user || { email: form.email };
+        login(userData, data.token);
       }
 
-      navigate("/home");
-
-    } catch (error) {
+      navigate("/Home");
+    } catch (err) {
       setError("Unable to connect to the server");
     } finally {
       setLoading(false);
@@ -107,102 +80,80 @@ function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
+      <div className="auth-page">
+        <div className="auth-container">
+          <h1>Welcome back</h1>
 
-        <h1>Welcome back</h1>
+          <p className="subtitle">Sign in to your Waraq account</p>
 
-        <p className="subtitle">
-          Sign in to your Waraq account
-        </p>
-
-        <div className="auth-tabs">
-
-          <button
-            className="tab"
-            onClick={() => navigate("/register")}
-          >
-            Sign Up
-          </button>
-
-          <button
-            className="tab active"
-            onClick={() => navigate("/login")}
-          >
-            Log In
-          </button>
-
-        </div>
-
-        <form onSubmit={handleSubmit}>
-
-          <div className="form-group">
-            <label>Email Address</label>
-
-            <input
-              type="email"
-              name="email"
-              placeholder="ahmad@example.com"
-              value={form.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Password</label>
-
-            <input
-              type="password"
-              name="password"
-              placeholder="Your password"
-              value={form.password}
-              onChange={handleChange}
-            />
-
-            {error && (
-              <span className="error">
-                {error}
-              </span>
-            )}
-          </div>
-
-          <div className="login-options">
-
-            <label className="remember-me">
-
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={form.rememberMe}
-                onChange={handleChange}
-              />
-
-              <span>Remember me</span>
-
-            </label>
-
-            <button
-              type="button"
-              className="forgot-link"
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forgot password?
+          <div className="auth-tabs">
+            <button className="tab" onClick={() => navigate("/Register")}>
+              Sign Up
             </button>
 
+            <button className="tab active" onClick={() => navigate("/Login")}>
+              Log In
+            </button>
           </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email Address</label>
 
-        </form>
+              <input
+                  type="email"
+                  name="email"
+                  placeholder="ahmad@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+              />
+            </div>
 
+            <div className="form-group">
+              <label>Password</label>
+
+              <input
+                  type="password"
+                  name="password"
+                  placeholder="Your password"
+                  value={form.password}
+                  onChange={handleChange}
+              />
+
+              {error && <span className="error">{error}</span>}
+            </div>
+
+            <div className="login-options">
+              <label className="remember-me">
+                <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={form.rememberMe}
+                    onChange={handleChange}
+                />
+
+                <span>Remember me</span>
+              </label>
+
+              <button
+                  type="button"
+                  className="forgot-link"
+                  onClick={() => navigate("/ForgotPassword")}
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            <button
+                className="primary-button"
+                type="submit"
+                disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
   );
 }
 

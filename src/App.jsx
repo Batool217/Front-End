@@ -1,26 +1,32 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-import Register from "./pages/Register";
 import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
-
-import "./styles/css/auth.css";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+    return (
+        <BrowserRouter>
+            <Routes>
+                {/* التوجيه الافتراضي إلى صفحة الدخول */}
+                <Route path="/" element={<Navigate to="/Login" />} />
 
-        <Route path="/Register" element={<Register />} />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/ForgotPassword" element={<ForgotPassword />} />
+                <Route path="/Login" element={<Login />} />
 
-        <Route path="/Home" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
-  );
+                {/* المسار المحمي - تأكد من مطابقة حرف H الكبير */}
+                <Route
+                    path="/Home"
+                    element={
+                        <PrivateRoute>
+                            <Home />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* إعادة توجيه أي مسار غير معروف */}
+                <Route path="*" element={<Navigate to="/Login" />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
