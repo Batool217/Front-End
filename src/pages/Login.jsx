@@ -10,7 +10,7 @@ function Login() {
     rememberMe: false,
   });
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -21,23 +21,37 @@ function Login() {
       [name]: type === "checkbox" ? checked : value,
     });
 
-    setError("");
+    setErrors({
+      ...errors,
+      [name]: "",
+      general: "",
+    });
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    const trimmedEmail = form.email.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!trimmedEmail) {
+      newErrors.email = "Email address is required";
+    } else if (!emailRegex.test(trimmedEmail)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
-
-    if (!form.email.trim()) {
-      setError("Email is required");
-      return;
-    }
-
-    if (!form.password) {
-      setError("Password is required");
-      return;
-    }
+    if (!validate()) return;
 
     setLoading(true);
 
@@ -56,23 +70,6 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-
-        /*
-          Backend should ideally return something like:
-
-          {
-            "message": "Email is not registered",
-            "code": "EMAIL_NOT_REGISTERED"
-          }
-
-          OR
-
-          {
-            "message": "Invalid email or password",
-            "code": "INVALID_CREDENTIALS"
-          }
-        */
-
         if (
           data.code === "EMAIL_NOT_REGISTERED" ||
           data.error === "EMAIL_NOT_REGISTERED"
@@ -81,14 +78,13 @@ function Login() {
           return;
         }
 
-        setError(
-          data.message || "Invalid email or password"
-        );
+        setErrors({
+          general: data.message || "Invalid email or password",
+        });
 
         return;
       }
 
-      // Save authentication information
       if (data.token) {
         if (form.rememberMe) {
           localStorage.setItem("token", data.token);
@@ -100,7 +96,9 @@ function Login() {
       navigate("/home");
 
     } catch (error) {
-      setError("Unable to connect to the server");
+      setErrors({
+        general: "Unable to connect to the server",
+      });
     } finally {
       setLoading(false);
     }
@@ -134,6 +132,12 @@ function Login() {
 
         </div>
 
+        {errors.general && (
+          <div className="general-error">
+            {errors.general}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
 
           <div className="form-group">
@@ -146,6 +150,12 @@ function Login() {
               value={form.email}
               onChange={handleChange}
             />
+
+            {errors.email && (
+              <span className="error">
+                {errors.email}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
@@ -159,9 +169,9 @@ function Login() {
               onChange={handleChange}
             />
 
-            {error && (
+            {errors.password && (
               <span className="error">
-                {error}
+                {errors.password}
               </span>
             )}
           </div>
@@ -207,3 +217,5 @@ function Login() {
 }
 
 export default Login;
+
+
