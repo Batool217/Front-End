@@ -10,6 +10,7 @@ function Register() {
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phoneNumber: "",
   });
 
@@ -34,13 +35,9 @@ function Register() {
     });
   };
 
-  // =======================================================
-  // 🔍 [دالة التحقق الدقيق جداً من صحة البيانات - Strict Validation]
-  // =======================================================
   const validate = () => {
     const newErrors = {};
 
-    // 1. فحص الاسم الكامل (Full Name): فارغ؟ حروف فقط؟ اسم أول وعائلة؟ طول مناسب؟
     const trimmedName = form.fullName.trim();
     if (!trimmedName) {
       newErrors.fullName = "Full name is required";
@@ -52,7 +49,6 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
-    // 2. فحص رقم الهاتف (Phone Number): فارغ؟ صيغة أرقام صحيحة؟
     const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
@@ -60,7 +56,6 @@ function Register() {
       newErrors.phoneNumber = "Enter a valid phone number (e.g. +962 79 123 4567)";
     }
 
-    // 3. فحص البريد الإلكتروني (Email Address): فارغ؟ صيغة إيميل صحيحة؟
     const trimmedEmail = form.email.trim();
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!trimmedEmail) {
@@ -69,7 +64,6 @@ function Register() {
       newErrors.email = "Enter a valid email address (e.g. name@example.com)";
     }
 
-    // 4. فحص كلمة المرور المعقدة (Password Complexity): طول 8+، حرف كبير، حرف صغير، رقم، رمز خاص
     if (!form.password) {
       newErrors.password = "Password is required";
     } else if (form.password.length < 8) {
@@ -84,24 +78,26 @@ function Register() {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
     }
 
-    // حفظ كائن الأخطاء في الـ State
-    setErrors(newErrors);
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
 
-    // ترجع true فقط إذا لم تكن هناك أي أخطاء (عدد الأخطاء 0)
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // دالة إرسال النموذج عند ضغط زر Submit
   const handleSubmit = async (e) => {
-    e.preventDefault(); // منع إعادة تحميل الصفحة الافتراضي
+    e.preventDefault();
 
-    // خطوة الـ Validation الإلزامية قبل الإرسال للباك إند
-    if (!validate()) return; // إيقاف الإرسال فوراً إذا فشل الفحص
+    if (!validate()) return;
 
     setLoading(true);
 
     try {
-      // إرسال طلب إنشاء حساب جديد للـ API
+      const { confirmPassword, ...registrationData } = form;
+
       const response = await fetch(
         "http://localhost:8080/api/auth/register",
         {
@@ -109,13 +105,12 @@ function Register() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(registrationData),
         }
       );
 
       const data = await response.json();
 
-      // التعامل مع أخطاء السيرفر (مثل الإيميل مسجل مسبقاً)
       if (!response.ok) {
         setErrors({
           general: data.message || "Registration failed",
@@ -124,7 +119,6 @@ function Register() {
         return;
       }
 
-      // التسجيل نجح -> التوجيه لصفحة تسجيل الدخول
       navigate("/login");
     } catch (error) {
       setErrors({
@@ -145,7 +139,6 @@ function Register() {
           Join thousands of students buying and selling books
         </p>
 
-        {/* أزرار التنقل بين التسجيل والدخول */}
         <div className="auth-tabs">
           <button
             className="tab active"
@@ -162,7 +155,6 @@ function Register() {
           </button>
         </div>
 
-        {/* عرض الخطأ العام (مثل خطأ الاتصال بالسيرفر) */}
         {errors.general && (
           <div className="general-error">
             {errors.general}
@@ -173,7 +165,6 @@ function Register() {
 
           <div className="form-row">
 
-            {/* حقل الاسم الكامل */}
             <div className="form-group">
               <label>Full Name</label>
 
@@ -185,7 +176,6 @@ function Register() {
                 onChange={handleChange}
               />
 
-              {/* عرض رسالة الخطأ الخاصة بالاسم في حال وجودها */}
               {errors.fullName && (
                 <span className="error">
                   {errors.fullName}
@@ -193,7 +183,6 @@ function Register() {
               )}
             </div>
 
-            {/* حقل رقم الهاتف */}
             <div className="form-group">
               <label>Phone Number</label>
 
@@ -205,7 +194,6 @@ function Register() {
                 onChange={handleChange}
               />
 
-              {/* عرض رسالة الخطأ الخاصة برقم الهاتف */}
               {errors.phoneNumber && (
                 <span className="error">
                   {errors.phoneNumber}
@@ -215,7 +203,6 @@ function Register() {
 
           </div>
 
-          {/* حقل البريد الإلكتروني */}
           <div className="form-group">
             <label>Email Address</label>
 
@@ -227,7 +214,6 @@ function Register() {
               onChange={handleChange}
             />
 
-            {/* عرض رسالة الخطأ الخاصة بالبريد */}
             {errors.email && (
               <span className="error">
                 {errors.email}
@@ -247,10 +233,28 @@ function Register() {
               onChange={handleChange}
             />
 
-            {/* عرض رسالة الخطأ الخاصة بكلمة المرور */}
             {errors.password && (
               <span className="error">
                 {errors.password}
+              </span>
+            )}
+          </div>
+
+          {/* حقل تأكيد كلمة المرور */}
+          <div className="form-group">
+            <label>Confirm Password</label>
+
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Re-enter your password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+            />
+
+            {errors.confirmPassword && (
+              <span className="error">
+                {errors.confirmPassword}
               </span>
             )}
           </div>
