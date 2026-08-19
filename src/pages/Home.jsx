@@ -1,3 +1,4 @@
+// الصفحة الرئيسية (Home Page) التي يتم التوجيه إليها بعد نجاح عملية تسجيل الدخول
 function Home() {
   return (
     <div style={{ padding: "40px" }}>
@@ -7,4 +8,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Home;
