@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
 
 function Register() {
   const navigate = useNavigate();
@@ -146,6 +147,7 @@ function Register() {
       <AuthVisualPanel />
 
       <div className="auth-form-panel">
+        <PaperBackground />
         <div className="auth-container">
           <h1>Create your account</h1>
 
@@ -176,32 +178,34 @@ function Register() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                placeholder="Abdel rahman"
-                value={form.fullName}
-                onChange={handleChange}
-              />
-              {errors.fullName && (
-                <span className="error">{errors.fullName}</span>
-              )}
-            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Abdel rahman"
+                  value={form.fullName}
+                  onChange={handleChange}
+                />
+                {errors.fullName && (
+                  <span className="error">{errors.fullName}</span>
+                )}
+              </div>
 
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input
-                type="text"
-                name="phoneNumber"
-                placeholder="+962791234567"
-                value={form.phoneNumber}
-                onChange={handleChange}
-              />
-              {errors.phoneNumber && (
-                <span className="error">{errors.phoneNumber}</span>
-              )}
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  placeholder="+962791234567"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                />
+                {errors.phoneNumber && (
+                  <span className="error">{errors.phoneNumber}</span>
+                )}
+              </div>
             </div>
 
             <div className="form-group">

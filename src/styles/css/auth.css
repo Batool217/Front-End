@@ -147,6 +147,7 @@ input {
 /* Right form panel */
 
 .auth-form-panel {
+  position: relative;
   flex: 1;
   display: flex;
   justify-content: center;
@@ -156,6 +157,8 @@ input {
 }
 
 .auth-container {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 420px;
 }

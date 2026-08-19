@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
 
 function Login() {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ function Login() {
         <AuthVisualPanel />
 
         <div className="auth-form-panel">
+          <PaperBackground />
           <div className="auth-container">
 
             <h1>Welcome back</h1>
