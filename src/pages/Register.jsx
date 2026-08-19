@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthVisualPanel from "../components/AuthVisualPanel";
 
 function Register() {
-  // هوك التنقل بين الصفحات في React Router
   const navigate = useNavigate();
 
-  // 1. حالة النموذج (Form State): تخزين ما يكتبه المستخدم بالنموذج
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -14,20 +13,15 @@ function Register() {
     phoneNumber: "",
   });
 
-  // 2. حالة الأخطاء (Errors State): تخزين رسائل الأخطاء لكل حقل
   const [errors, setErrors] = useState({});
-
-  // 3. حالة التحميل (Loading State): لتعطيل الزر أثناء إرسال البيانات
   const [loading, setLoading] = useState(false);
 
-  // دالة تُستدعى فوراً مع كل حرف يكتبه المستخدم في الحقول
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
 
-    // تفريغ خطأ الحقل الحالي فور أن يبدأ المستخدم بالتعديل
     setErrors({
       ...errors,
       [e.target.name]: "",
@@ -88,6 +82,13 @@ function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const backendToFrontendField = {
+    full_name: "fullName",
+    phone_number: "phoneNumber",
+    email: "email",
+    password: "password",
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -95,9 +96,14 @@ function Register() {
 
     setLoading(true);
 
-    try {
-      const { confirmPassword, ...registrationData } = form;
+    const payload = {
+      full_name: form.fullName,
+      email: form.email,
+      password: form.password,
+      phone_number: form.phoneNumber,
+    };
 
+    try {
       const response = await fetch(
         "http://localhost:8080/api/auth/register",
         {
@@ -105,24 +111,30 @@ function Register() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(registrationData),
+          body: JSON.stringify(payload),
         }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setErrors({
-          general: data.message || "Registration failed",
-          email: data.field === "email" ? data.message : "",
+        const backendErrors = data.errors || {};
+
+        const mappedErrors = {};
+        Object.entries(backendErrors).forEach(([key, message]) => {
+          const frontendKey = backendToFrontendField[key] || key;
+          mappedErrors[frontendKey] = message;
         });
+
+        setErrors(mappedErrors);
         return;
       }
 
       navigate("/login");
     } catch (error) {
+      const msg = "Unable to connect to the server";
       setErrors({
-        general: "Unable to connect to the server",
+        general: msg,
       });
     } finally {
       setLoading(false);
@@ -131,61 +143,55 @@ function Register() {
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
+      <AuthVisualPanel />
 
-        <h1>Create your account</h1>
+      <div className="auth-form-panel">
+        <div className="auth-container">
+          <h1>Create your account</h1>
 
-        <p className="subtitle">
-          Join thousands of students buying and selling books
-        </p>
+          <p className="subtitle">
+            Join thousands of students buying and selling books
+          </p>
 
-        <div className="auth-tabs">
-          <button
-            className="tab active"
-            onClick={() => navigate("/register")}
-          >
-            Sign Up
-          </button>
+          <div className="auth-tabs">
+            <button
+              className="tab active"
+              onClick={() => navigate("/register")}
+            >
+              Sign Up
+            </button>
 
-          <button
-            className="tab"
-            onClick={() => navigate("/login")}
-          >
-            Log In
-          </button>
-        </div>
-
-        {errors.general && (
-          <div className="general-error">
-            {errors.general}
+            <button
+              className="tab"
+              onClick={() => navigate("/login")}
+            >
+              Log In
+            </button>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit}>
+          {errors.general && (
+            <div className="general-error">
+              {errors.general}
+            </div>
+          )}
 
-          <div className="form-row">
-
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Full Name</label>
-
               <input
                 type="text"
                 name="fullName"
-                placeholder="Abde rahman"
+                placeholder="Abdel rahman"
                 value={form.fullName}
                 onChange={handleChange}
               />
-
               {errors.fullName && (
-                <span className="error">
-                  {errors.fullName}
-                </span>
+                <span className="error">{errors.fullName}</span>
               )}
             </div>
 
             <div className="form-group">
               <label>Phone Number</label>
-
               <input
                 type="text"
                 name="phoneNumber"
@@ -193,92 +199,70 @@ function Register() {
                 value={form.phoneNumber}
                 onChange={handleChange}
               />
-
               {errors.phoneNumber && (
-                <span className="error">
-                  {errors.phoneNumber}
-                </span>
+                <span className="error">{errors.phoneNumber}</span>
               )}
             </div>
 
-          </div>
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                value={form.email}
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <span className="error">{errors.email}</span>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label>Email Address</label>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                name="password"
+                placeholder="At least 8 chars (A-z, 0-9, !@#)"
+                value={form.password}
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <span className="error">{errors.password}</span>
+              )}
+            </div>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Abde rahman@example.com"
-              value={form.email}
-              onChange={handleChange}
-            />
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Re-enter your password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+              />
+              {errors.confirmPassword && (
+                <span className="error">{errors.confirmPassword}</span>
+              )}
+            </div>
 
-            {errors.email && (
-              <span className="error">
-                {errors.email}
-              </span>
-            )}
-          </div>
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
 
-          {/* حقل كلمة المرور */}
-          <div className="form-group">
-            <label>Password</label>
-
-            <input
-              type="password"
-              name="password"
-              placeholder="At least 8 chars (A-z, 0-9, !@#)"
-              value={form.password}
-              onChange={handleChange}
-            />
-
-            {errors.password && (
-              <span className="error">
-                {errors.password}
-              </span>
-            )}
-          </div>
-
-          {/* حقل تأكيد كلمة المرور */}
-          <div className="form-group">
-            <label>Confirm Password</label>
-
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Re-enter your password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-            />
-
-            {errors.confirmPassword && (
-              <span className="error">
-                {errors.confirmPassword}
-              </span>
-            )}
-          </div>
-
-          {/* زر الإرسال مع حالة التحميل */}
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Creating Account..." : "Create Account"}
-          </button>
-
-        </form>
-
-
-
+            <p className="auth-terms">
+              By signing up you agree to our <a href="#">Terms</a> &amp;{" "}
+              <a href="#">Privacy Policy</a>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );
 }
 
 export default Register;
-
-
-
-
