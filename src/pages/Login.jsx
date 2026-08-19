@@ -96,7 +96,7 @@ function Login() {
 
       navigate("/Home");
 
-    } catch (error) {
+    } catch {
       setErrors({
         general: "Unable to connect to the server",
       });

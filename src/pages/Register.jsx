@@ -49,7 +49,7 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
-    const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
+    const cleanedPhone = form.phoneNumber.replace(/[\s\-()]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
     } else if (!/^(\+?\d{1,4})?\d{10,14}$/.test(cleanedPhone)) {
@@ -74,7 +74,7 @@ function Register() {
       newErrors.password = "Password must include at least one lowercase letter (a-z)";
     } else if (!/[0-9]/.test(form.password)) {
       newErrors.password = "Password must include at least one number (0-9)";
-    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password)) {
+    } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password)) {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
     }
 
@@ -112,7 +112,7 @@ function Register() {
       }
 
       navigate("/login");
-    } catch (error) {
+    } catch {
       setErrors({
         general: "Unable to connect to the server",
       });
