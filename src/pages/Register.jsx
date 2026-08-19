@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
+  // هوك التنقل بين الصفحات في React Router
   const navigate = useNavigate();
 
+  // 1. حالة النموذج (Form State): تخزين ما يكتبه المستخدم بالنموذج
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -11,15 +13,20 @@ function Register() {
     phoneNumber: "",
   });
 
+  // 2. حالة الأخطاء (Errors State): تخزين رسائل الأخطاء لكل حقل
   const [errors, setErrors] = useState({});
+
+  // 3. حالة التحميل (Loading State): لتعطيل الزر أثناء إرسال البيانات
   const [loading, setLoading] = useState(false);
 
+  // دالة تُستدعى فوراً مع كل حرف يكتبه المستخدم في الحقول
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
 
+    // تفريغ خطأ الحقل الحالي فور أن يبدأ المستخدم بالتعديل
     setErrors({
       ...errors,
       [e.target.name]: "",
@@ -27,9 +34,13 @@ function Register() {
     });
   };
 
+  // =======================================================
+  // 🔍 [دالة التحقق الدقيق جداً من صحة البيانات - Strict Validation]
+  // =======================================================
   const validate = () => {
     const newErrors = {};
 
+    // 1. فحص الاسم الكامل (Full Name): فارغ؟ حروف فقط؟ اسم أول وعائلة؟ طول مناسب؟
     const trimmedName = form.fullName.trim();
     if (!trimmedName) {
       newErrors.fullName = "Full name is required";
@@ -41,13 +52,15 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
+    // 2. فحص رقم الهاتف (Phone Number): فارغ؟ صيغة أرقام صحيحة؟
     const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
-    } else if (!/^(\+?\d{1,4})?\d{7,14}$/.test(cleanedPhone)) {
+    } else if (!/^(\+?\d{1,4})?\d{10,14}$/.test(cleanedPhone)) {
       newErrors.phoneNumber = "Enter a valid phone number (e.g. +962 79 123 4567)";
     }
 
+    // 3. فحص البريد الإلكتروني (Email Address): فارغ؟ صيغة إيميل صحيحة؟
     const trimmedEmail = form.email.trim();
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!trimmedEmail) {
@@ -56,6 +69,7 @@ function Register() {
       newErrors.email = "Enter a valid email address (e.g. name@example.com)";
     }
 
+    // 4. فحص كلمة المرور المعقدة (Password Complexity): طول 8+، حرف كبير، حرف صغير، رقم، رمز خاص
     if (!form.password) {
       newErrors.password = "Password is required";
     } else if (form.password.length < 8) {
@@ -70,18 +84,24 @@ function Register() {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
     }
 
+    // حفظ كائن الأخطاء في الـ State
     setErrors(newErrors);
+
+    // ترجع true فقط إذا لم تكن هناك أي أخطاء (عدد الأخطاء 0)
     return Object.keys(newErrors).length === 0;
   };
 
+  // دالة إرسال النموذج عند ضغط زر Submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // منع إعادة تحميل الصفحة الافتراضي
 
-    if (!validate()) return;
+    // خطوة الـ Validation الإلزامية قبل الإرسال للباك إند
+    if (!validate()) return; // إيقاف الإرسال فوراً إذا فشل الفحص
 
     setLoading(true);
 
     try {
+      // إرسال طلب إنشاء حساب جديد للـ API
       const response = await fetch(
         "http://localhost:8080/api/auth/register",
         {
@@ -95,6 +115,7 @@ function Register() {
 
       const data = await response.json();
 
+      // التعامل مع أخطاء السيرفر (مثل الإيميل مسجل مسبقاً)
       if (!response.ok) {
         setErrors({
           general: data.message || "Registration failed",
@@ -103,6 +124,7 @@ function Register() {
         return;
       }
 
+      // التسجيل نجح -> التوجيه لصفحة تسجيل الدخول
       navigate("/login");
     } catch (error) {
       setErrors({
@@ -123,6 +145,7 @@ function Register() {
           Join thousands of students buying and selling books
         </p>
 
+        {/* أزرار التنقل بين التسجيل والدخول */}
         <div className="auth-tabs">
           <button
             className="tab active"
@@ -139,6 +162,7 @@ function Register() {
           </button>
         </div>
 
+        {/* عرض الخطأ العام (مثل خطأ الاتصال بالسيرفر) */}
         {errors.general && (
           <div className="general-error">
             {errors.general}
@@ -149,17 +173,19 @@ function Register() {
 
           <div className="form-row">
 
+            {/* حقل الاسم الكامل */}
             <div className="form-group">
               <label>Full Name</label>
 
               <input
                 type="text"
                 name="fullName"
-                placeholder="Ahmad Al-Khatib"
+                placeholder="Abde rahman"
                 value={form.fullName}
                 onChange={handleChange}
               />
 
+              {/* عرض رسالة الخطأ الخاصة بالاسم في حال وجودها */}
               {errors.fullName && (
                 <span className="error">
                   {errors.fullName}
@@ -167,17 +193,19 @@ function Register() {
               )}
             </div>
 
+            {/* حقل رقم الهاتف */}
             <div className="form-group">
               <label>Phone Number</label>
 
               <input
                 type="text"
                 name="phoneNumber"
-                placeholder="+962 79 123 4567"
+                placeholder="+962791234567"
                 value={form.phoneNumber}
                 onChange={handleChange}
               />
 
+              {/* عرض رسالة الخطأ الخاصة برقم الهاتف */}
               {errors.phoneNumber && (
                 <span className="error">
                   {errors.phoneNumber}
@@ -187,17 +215,19 @@ function Register() {
 
           </div>
 
+          {/* حقل البريد الإلكتروني */}
           <div className="form-group">
             <label>Email Address</label>
 
             <input
               type="email"
               name="email"
-              placeholder="ahmad@example.com"
+              placeholder="Abde rahman@example.com"
               value={form.email}
               onChange={handleChange}
             />
 
+            {/* عرض رسالة الخطأ الخاصة بالبريد */}
             {errors.email && (
               <span className="error">
                 {errors.email}
@@ -205,6 +235,7 @@ function Register() {
             )}
           </div>
 
+          {/* حقل كلمة المرور */}
           <div className="form-group">
             <label>Password</label>
 
@@ -216,6 +247,7 @@ function Register() {
               onChange={handleChange}
             />
 
+            {/* عرض رسالة الخطأ الخاصة بكلمة المرور */}
             {errors.password && (
               <span className="error">
                 {errors.password}
@@ -223,6 +255,7 @@ function Register() {
             )}
           </div>
 
+          {/* زر الإرسال مع حالة التحميل */}
           <button
             className="primary-button"
             type="submit"
@@ -233,11 +266,7 @@ function Register() {
 
         </form>
 
-        <p className="terms">
-          By signing up you agree to our{" "}
-          <strong>Terms</strong> &{" "}
-          <strong>Privacy Policy</strong>
-        </p>
+
 
       </div>
     </div>
@@ -247,4 +276,5 @@ function Register() {
 export default Register;
 
 
-
+
+
