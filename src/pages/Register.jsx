@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
+import Spinner from "../components/Spinner";
+import { notifySuccess, notifyError } from "../utils/notify";
 
 function Register() {
-  // هوك التنقل بين الصفحات في React Router
   const navigate = useNavigate();
 
-  // 1. حالة النموذج (Form State): تخزين ما يكتبه المستخدم بالنموذج
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -14,20 +15,15 @@ function Register() {
     phoneNumber: "",
   });
 
-  // 2. حالة الأخطاء (Errors State): تخزين رسائل الأخطاء لكل حقل
   const [errors, setErrors] = useState({});
-
-  // 3. حالة التحميل (Loading State): لتعطيل الزر أثناء إرسال البيانات
   const [loading, setLoading] = useState(false);
 
-  // دالة تُستدعى فوراً مع كل حرف يكتبه المستخدم في الحقول
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
 
-    // تفريغ خطأ الحقل الحالي فور أن يبدأ المستخدم بالتعديل
     setErrors({
       ...errors,
       [e.target.name]: "",
@@ -82,12 +78,26 @@ function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const backendToFrontendField = {
+    full_name: "fullName",
+    phone_number: "phoneNumber",
+    email: "email",
+    password: "password",
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
 
     setLoading(true);
+
+    const payload = {
+      full_name: form.fullName,
+      email: form.email,
+      password: form.password,
+      phone_number: form.phoneNumber,
+    };
 
     try {
       const response = await fetch(
@@ -97,25 +107,41 @@ function Register() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(form),
+            body: JSON.stringify(payload),
           }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setErrors({
-          general: data.message || "Registration failed",
-          email: data.field === "email" ? data.message : "",
+        const backendErrors = data.errors || {};
+
+        const mappedErrors = {};
+        Object.entries(backendErrors).forEach(([key, message]) => {
+          const frontendKey = backendToFrontendField[key] || key;
+          mappedErrors[frontendKey] = message;
         });
+
+        setErrors(mappedErrors);
+
+        const firstErrorMessage =
+            Object.values(backendErrors)[0] || "Registration failed";
+        notifyError(firstErrorMessage);
+
         return;
       }
 
+      notifySuccess(data.message || "Account created successfully! Please log in.");
       navigate("/login");
-    } catch {
+
+    } catch (error) {
+      const msg = "Unable to connect to the server";
+
       setErrors({
-        general: "Unable to connect to the server",
+        general: msg,
       });
+
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
@@ -123,6 +149,7 @@ function Register() {
 
   return (
       <div className="auth-page">
+        <PaperBackground />
         <AuthVisualPanel />
 
         <div className="auth-form-panel">
@@ -166,7 +193,7 @@ function Register() {
                   <input
                       type="text"
                       name="fullName"
-                      placeholder="yousef"
+                      placeholder="Abdel rahman"
                       value={form.fullName}
                       onChange={handleChange}
                   />
@@ -204,7 +231,7 @@ function Register() {
                 <input
                     type="email"
                     name="email"
-                    placeholder="yousef@example.com"
+                    placeholder="Abdel rahman@example.com"
                     value={form.email}
                     onChange={handleChange}
                 />
@@ -241,7 +268,7 @@ function Register() {
                   type="submit"
                   disabled={loading}
               >
-                {loading ? "Creating Account..." : "Create Account"}
+                {loading ? <Spinner /> : "Create Account"}
               </button>
 
               <p className="auth-terms">

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
+import Spinner from "../components/Spinner";
+import { notifySuccess, notifyError } from "../utils/notify";
 
 function Login() {
   const navigate = useNavigate();
@@ -75,13 +78,18 @@ function Login() {
             data.code === "EMAIL_NOT_REGISTERED" ||
             data.error === "EMAIL_NOT_REGISTERED"
         ) {
+          notifyError("This email is not registered");
           navigate("/Register");
           return;
         }
 
+        const msg = data.message || "Invalid email or password";
+
         setErrors({
-          general: data.message || "Invalid email or password",
+          general: msg,
         });
+
+        notifyError(msg);
 
         return;
       }
@@ -94,12 +102,17 @@ function Login() {
         }
       }
 
+      notifySuccess("Logged in successfully");
       navigate("/Home");
 
-    } catch {
+    } catch (error) {
+      const msg = "Unable to connect to the server";
+
       setErrors({
-        general: "Unable to connect to the server",
+        general: msg,
       });
+
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
@@ -107,6 +120,7 @@ function Login() {
 
   return (
       <div className="auth-page">
+        <PaperBackground />
         <AuthVisualPanel />
 
         <div className="auth-form-panel">
@@ -192,10 +206,6 @@ function Login() {
                   <span>Remember me</span>
                 </label>
 
-                {/*<a className="forgot-link" href="#">*/}
-                {/*  Forgot password?*/}
-                {/*</a>*/}
-
               </div>
 
               <button
@@ -203,7 +213,7 @@ function Login() {
                   type="submit"
                   disabled={loading}
               >
-                {loading ? "Logging in..." : "Log In"}
+                {loading ? <Spinner /> : "Log In"}
               </button>
 
             </form>
