@@ -8,6 +8,7 @@ function Register() {
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phoneNumber: "",
   });
 
@@ -26,7 +27,6 @@ function Register() {
       general: "",
     });
   };
-
   const validate = () => {
     const newErrors = {};
 
@@ -50,6 +50,12 @@ function Register() {
       newErrors.password = "Password must be at least 8 characters";
     }
 
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -63,15 +69,17 @@ function Register() {
     setLoading(true);
 
     try {
+      const { confirmPassword, ...registrationData } = form;
+
       const response = await fetch(
-        "http://localhost:8080/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
+          "http://localhost:8080/api/auth/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(registrationData),
+          }
       );
 
       const data = await response.json();
@@ -207,6 +215,24 @@ function Register() {
               <span className="error">
                 {errors.password}
               </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Confirm Password</label>
+
+            <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Re-enter your password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+            />
+
+            {errors.confirmPassword && (
+                <span className="error">
+      {errors.confirmPassword}
+    </span>
             )}
           </div>
 
