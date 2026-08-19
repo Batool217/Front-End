@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthVisualPanel from "../components/AuthVisualPanel";
 
 function Register() {
   // هوك التنقل بين الصفحات في React Router
@@ -11,6 +10,7 @@ function Register() {
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phoneNumber: "",
   });
 
@@ -49,7 +49,7 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
-    const cleanedPhone = form.phoneNumber.replace(/[\s\-()]/g, "");
+    const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
     } else if (!/^(\+?\d{1,4})?\d{10,14}$/.test(cleanedPhone)) {
@@ -74,8 +74,14 @@ function Register() {
       newErrors.password = "Password must include at least one lowercase letter (a-z)";
     } else if (!/[0-9]/.test(form.password)) {
       newErrors.password = "Password must include at least one number (0-9)";
-    } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password)) {
+    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password)) {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -90,15 +96,17 @@ function Register() {
     setLoading(true);
 
     try {
+      const { confirmPassword, ...registrationData } = form;
+
       const response = await fetch(
-          "http://localhost:8080/api/auth/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(form),
-          }
+        "http://localhost:8080/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(registrationData),
+        }
       );
 
       const data = await response.json();
@@ -112,7 +120,7 @@ function Register() {
       }
 
       navigate("/login");
-    } catch {
+    } catch (error) {
       setErrors({
         general: "Unable to connect to the server",
       });
@@ -122,139 +130,155 @@ function Register() {
   };
 
   return (
-      <div className="auth-page">
-        <AuthVisualPanel />
+    <div className="auth-page">
+      <div className="auth-container">
 
-        <div className="auth-form-panel">
-          <div className="auth-container">
+        <h1>Create your account</h1>
 
-            <h1>Create your account</h1>
+        <p className="subtitle">
+          Join thousands of students buying and selling books
+        </p>
 
-            <p className="subtitle">
-              Join thousands of students buying and selling books
-            </p>
+        <div className="auth-tabs">
+          <button
+            className="tab active"
+            onClick={() => navigate("/register")}
+          >
+            Sign Up
+          </button>
 
-            <div className="auth-tabs">
-              <button
-                  className="tab active"
-                  onClick={() => navigate("/register")}
-              >
-                Sign Up
-              </button>
+          <button
+            className="tab"
+            onClick={() => navigate("/login")}
+          >
+            Log In
+          </button>
+        </div>
 
-              <button
-                  className="tab"
-                  onClick={() => navigate("/login")}
-              >
-                Log In
-              </button>
-            </div>
+        {errors.general && (
+          <div className="general-error">
+            {errors.general}
+          </div>
+        )}
 
-            {errors.general && (
-                <div className="general-error">
-                  {errors.general}
-                </div>
-            )}
+        <form onSubmit={handleSubmit}>
 
-            <form onSubmit={handleSubmit}>
+          <div className="form-row">
 
-              <div className="form-row">
+            <div className="form-group">
+              <label>Full Name</label>
 
-                <div className="form-group">
-                  <label>Full Name</label>
+              <input
+                type="text"
+                name="fullName"
+                placeholder="Abde rahman"
+                value={form.fullName}
+                onChange={handleChange}
+              />
 
-                  <input
-                      type="text"
-                      name="fullName"
-                      placeholder="Abde rahman"
-                      value={form.fullName}
-                      onChange={handleChange}
-                  />
-
-                  {errors.fullName && (
-                      <span className="error">
+              {errors.fullName && (
+                <span className="error">
                   {errors.fullName}
                 </span>
-                  )}
-                </div>
+              )}
+            </div>
 
-                <div className="form-group">
-                  <label>Phone Number</label>
+            <div className="form-group">
+              <label>Phone Number</label>
 
-                  <input
-                      type="text"
-                      name="phoneNumber"
-                      placeholder="+962791234567"
-                      value={form.phoneNumber}
-                      onChange={handleChange}
-                  />
+              <input
+                type="text"
+                name="phoneNumber"
+                placeholder="+962791234567"
+                value={form.phoneNumber}
+                onChange={handleChange}
+              />
 
-                  {errors.phoneNumber && (
-                      <span className="error">
+              {errors.phoneNumber && (
+                <span className="error">
                   {errors.phoneNumber}
                 </span>
-                  )}
-                </div>
-
-              </div>
-
-              <div className="form-group">
-                <label>Email Address</label>
-
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Abde rahman@example.com"
-                    value={form.email}
-                    onChange={handleChange}
-                />
-
-                {errors.email && (
-                    <span className="error">
-                {errors.email}
-              </span>
-                )}
-              </div>
-
-              {/* حقل كلمة المرور */}
-              <div className="form-group">
-                <label>Password</label>
-
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="At least 8 characters"
-                    value={form.password}
-                    onChange={handleChange}
-                />
-
-                {errors.password && (
-                    <span className="error">
-                {errors.password}
-              </span>
-                )}
-              </div>
-
-              {/* زر الإرسال مع حالة التحميل */}
-              <button
-                  className="primary-button"
-                  type="submit"
-                  disabled={loading}
-              >
-                {loading ? "Creating Account..." : "Create Account"}
-              </button>
-
-              <p className="auth-terms">
-                By signing up you agree to our <a href="#">Terms</a> &amp;{" "}
-                <a href="#">Privacy Policy</a>
-              </p>
-
-            </form>
+              )}
+            </div>
 
           </div>
-        </div>
+
+          <div className="form-group">
+            <label>Email Address</label>
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Abde rahman@example.com"
+              value={form.email}
+              onChange={handleChange}
+            />
+
+            {errors.email && (
+              <span className="error">
+                {errors.email}
+              </span>
+            )}
+          </div>
+
+          {/* حقل كلمة المرور */}
+          <div className="form-group">
+            <label>Password</label>
+
+            <input
+              type="password"
+              name="password"
+              placeholder="At least 8 chars (A-z, 0-9, !@#)"
+              value={form.password}
+              onChange={handleChange}
+            />
+
+            {errors.password && (
+              <span className="error">
+                {errors.password}
+              </span>
+            )}
+          </div>
+
+          {/* حقل تأكيد كلمة المرور */}
+          <div className="form-group">
+            <label>Confirm Password</label>
+
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Re-enter your password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+            />
+
+            {errors.confirmPassword && (
+              <span className="error">
+                {errors.confirmPassword}
+              </span>
+            )}
+          </div>
+
+          {/* زر الإرسال مع حالة التحميل */}
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+
+        </form>
+
+
+
       </div>
+    </div>
   );
 }
 
 export default Register;
+
+
+
+
