@@ -192,9 +192,9 @@ function Login() {
                   <span>Remember me</span>
                 </label>
 
-                <a className="forgot-link" href="#">
-                  Forgot password?
-                </a>
+                {/*<a className="forgot-link" href="#">*/}
+                {/*  Forgot password?*/}
+                {/*</a>*/}
 
               </div>
 
