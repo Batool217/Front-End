@@ -298,10 +298,39 @@ input {
   cursor: pointer;
 }
 
-.remember-me input {
-  width: 16px;
-  height: 16px;
+.remember-me input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #ffffff;
+  margin: 0;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 4px;
+  display: grid;
+  place-content: center;
   cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.remember-me input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: #ff851b;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.remember-me input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.remember-me input[type="checkbox"]:checked {
+  border-color: #ff851b;
 }
 
 .forgot-link {

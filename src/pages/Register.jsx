@@ -166,7 +166,7 @@ function Register() {
                   <input
                       type="text"
                       name="fullName"
-                      placeholder="Abde rahman"
+                      placeholder="Abdel rahman"
                       value={form.fullName}
                       onChange={handleChange}
                   />
@@ -204,7 +204,7 @@ function Register() {
                 <input
                     type="email"
                     name="email"
-                    placeholder="Abde rahman@example.com"
+                    placeholder="Abdel rahman@example.com"
                     value={form.email}
                     onChange={handleChange}
                 />
