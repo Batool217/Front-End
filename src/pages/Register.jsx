@@ -1,35 +1,29 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
 import Spinner from "../components/Spinner";
 import { notifySuccess, notifyError } from "../utils/notify";
 
 function Register() {
-  // هوك التنقل بين الصفحات في React Router
   const navigate = useNavigate();
 
-  // 1. حالة النموذج (Form State): تخزين ما يكتبه المستخدم بالنموذج
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: "",
     phoneNumber: "",
   });
 
-  // 2. حالة الأخطاء (Errors State): تخزين رسائل الأخطاء لكل حقل
   const [errors, setErrors] = useState({});
-
-  // 3. حالة التحميل (Loading State): لتعطيل الزر أثناء إرسال البيانات
   const [loading, setLoading] = useState(false);
 
-  // دالة تُستدعى فوراً مع كل حرف يكتبه المستخدم في الحقول
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
 
-    // تفريغ خطأ الحقل الحالي فور أن يبدأ المستخدم بالتعديل
     setErrors({
       ...errors,
       [e.target.name]: "",
@@ -51,7 +45,7 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
-    const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
+    const cleanedPhone = form.phoneNumber.replace(/[\s\-()]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
     } else if (!/^(\+?\d{1,4})?\d{10,14}$/.test(cleanedPhone)) {
@@ -76,14 +70,8 @@ function Register() {
       newErrors.password = "Password must include at least one lowercase letter (a-z)";
     } else if (!/[0-9]/.test(form.password)) {
       newErrors.password = "Password must include at least one number (0-9)";
-    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password)) {
+    } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password)) {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
-    }
-
-    if (!form.confirmPassword) {
-      newErrors.confirmPassword = "Confirm password is required";
-    } else if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -126,7 +114,6 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-
         const backendErrors = data.errors || {};
 
         const mappedErrors = {};
@@ -146,6 +133,7 @@ function Register() {
 
       notifySuccess(data.message || "Account created successfully! Please log in.");
       navigate("/login");
+
     } catch (error) {
       const msg = "Unable to connect to the server";
 
@@ -161,145 +149,136 @@ function Register() {
 
   return (
       <div className="auth-page">
-        <div className="auth-container">
+        <PaperBackground />
+        <AuthVisualPanel />
 
-          <h1>Create your account</h1>
+        <div className="auth-form-panel">
+          <div className="auth-container">
 
-          <p className="subtitle">
-            Join thousands of students buying and selling books
-          </p>
+            <h1>Create your account</h1>
 
-          <div className="auth-tabs">
-            <button
-                className="tab active"
-                onClick={() => navigate("/register")}
-            >
-              Sign Up
-            </button>
+            <p className="subtitle">
+              Join thousands of students buying and selling books
+            </p>
 
-            <button
-                className="tab"
-                onClick={() => navigate("/login")}
-            >
-              Log In
-            </button>
-          </div>
+            <div className="auth-tabs">
+              <button
+                  className="tab active"
+                  onClick={() => navigate("/register")}
+              >
+                Sign Up
+              </button>
 
-          {errors.general && (
-              <div className="general-error">
-                {errors.general}
-              </div>
-          )}
+              <button
+                  className="tab"
+                  onClick={() => navigate("/login")}
+              >
+                Log In
+              </button>
+            </div>
 
-          <form onSubmit={handleSubmit}>
+            {errors.general && (
+                <div className="general-error">
+                  {errors.general}
+                </div>
+            )}
 
-            <div className="form-row">
+            <form onSubmit={handleSubmit}>
 
-              <div className="form-group">
-                <label>Full Name</label>
+              <div className="form-row">
 
-                <input
-                    type="text"
-                    name="fullName"
-                    placeholder="Abde rahman"
-                    value={form.fullName}
-                    onChange={handleChange}
-                />
+                <div className="form-group">
+                  <label>Full Name</label>
 
-                {errors.fullName && (
-                    <span className="error">
+                  <input
+                      type="text"
+                      name="fullName"
+                      placeholder="Abdel rahman"
+                      value={form.fullName}
+                      onChange={handleChange}
+                  />
+
+                  {errors.fullName && (
+                      <span className="error">
                   {errors.fullName}
                 </span>
-                )}
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label>Phone Number</label>
+
+                  <input
+                      type="text"
+                      name="phoneNumber"
+                      placeholder="+962791234567"
+                      value={form.phoneNumber}
+                      onChange={handleChange}
+                  />
+
+                  {errors.phoneNumber && (
+                      <span className="error">
+                  {errors.phoneNumber}
+                </span>
+                  )}
+                </div>
+
               </div>
 
               <div className="form-group">
-                <label>Phone Number</label>
+                <label>Email Address</label>
 
                 <input
-                    type="text"
-                    name="phoneNumber"
-                    placeholder="+962791234567"
-                    value={form.phoneNumber}
+                    type="email"
+                    name="email"
+                    placeholder="Abdel rahman@example.com"
+                    value={form.email}
                     onChange={handleChange}
                 />
 
-                {errors.phoneNumber && (
+                {errors.email && (
                     <span className="error">
-                  {errors.phoneNumber}
-                </span>
+                {errors.email}
+              </span>
                 )}
               </div>
 
-            </div>
+              {/* حقل كلمة المرور */}
+              <div className="form-group">
+                <label>Password</label>
 
-            <div className="form-group">
-              <label>Email Address</label>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="At least 8 characters"
+                    value={form.password}
+                    onChange={handleChange}
+                />
 
-              <input
-                  type="email"
-                  name="email"
-                  placeholder="Abde rahman@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-              />
-
-              {errors.email && (
-                  <span className="error">
-                {errors.email}
-              </span>
-              )}
-            </div>
-
-            {/* حقل كلمة المرور */}
-            <div className="form-group">
-              <label>Password</label>
-
-              <input
-                  type="password"
-                  name="password"
-                  placeholder="At least 8 chars (A-z, 0-9, !@#)"
-                  value={form.password}
-                  onChange={handleChange}
-              />
-
-              {errors.password && (
-                  <span className="error">
+                {errors.password && (
+                    <span className="error">
                 {errors.password}
               </span>
-              )}
-            </div>
+                )}
+              </div>
 
-            {/* حقل تأكيد كلمة المرور */}
-            <div className="form-group">
-              <label>Confirm Password</label>
+              {/* زر الإرسال مع حالة التحميل */}
+              <button
+                  className="primary-button"
+                  type="submit"
+                  disabled={loading}
+              >
+                {loading ? <Spinner /> : "Create Account"}
+              </button>
 
-              <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Re-enter your password"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-              />
+              <p className="auth-terms">
+                By signing up you agree to our <a href="#">Terms</a> &amp;{" "}
+                <a href="#">Privacy Policy</a>
+              </p>
 
-              {errors.confirmPassword && (
-                  <span className="error">
-                {errors.confirmPassword}
-              </span>
-              )}
-            </div>
+            </form>
 
-            {/* زر الإرسال مع حالة التحميل */}
-            <button
-                className="primary-button"
-                type="submit"
-                disabled={loading}
-            >
-              {loading ? <Spinner /> : "Create Account"}
-            </button>
-
-          </form>
-
+          </div>
         </div>
       </div>
   );

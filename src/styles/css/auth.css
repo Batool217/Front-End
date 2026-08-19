@@ -14,18 +14,150 @@ input {
   font-family: inherit;
 }
 
+/* Auth pages (Login/Register) should ignore the default #root width cap
+   and fill the entire viewport edge-to-edge */
+#root:has(> .auth-page) {
+  width: 100%;
+  max-width: none;
+  border-inline: none;
+  margin: 0;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
   background: white;
-  padding: 35px 20px;
+}
+
+/* Left visual panel */
+
+.auth-visual {
+  position: relative;
+  width: 42%;
+  min-height: 100vh;
+  background: #12345b;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  flex-shrink: 0;
+}
+
+.auth-visual-circle-top {
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-visual-circle-bottom {
+  position: absolute;
+  bottom: -90px;
+  left: -70px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.auth-info-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.auth-logo-badge {
+  width: 110px;
+  height: 110px;
+  border-radius: 26px;
+  background: #ff851b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  margin-bottom: 22px;
+  box-shadow: 0 0 0 12px rgba(255, 133, 27, 0.15);
+}
+
+.auth-brand-name {
+  color: white;
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.auth-brand-tagline {
+  color: #b9c4d1;
+  font-size: 15px;
+  margin: 10px 0 36px;
+}
+
+.auth-features {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.auth-feature-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.auth-feature-title {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.auth-feature-desc {
+  color: #98a5b3;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Right form panel */
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
 }
 
 .auth-container {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
 }
 
 .auth-container h1 {
@@ -176,10 +308,39 @@ input {
   cursor: pointer;
 }
 
-.remember-me input {
-  width: 16px;
-  height: 16px;
+.remember-me input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #ffffff;
+  margin: 0;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 4px;
+  display: grid;
+  place-content: center;
   cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.remember-me input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: #ff851b;
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.remember-me input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.remember-me input[type="checkbox"]:checked {
+  border-color: #ff851b;
 }
 
 .forgot-link {
@@ -218,13 +379,38 @@ input {
   cursor: pointer;
 }
 
+/* Terms link under register button */
+
+.auth-terms {
+  text-align: center;
+  color: #9aa7b5;
+  font-size: 12px;
+  margin-top: 18px;
+}
+
+.auth-terms a {
+  color: #386aa0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-terms a:hover {
+  text-decoration: underline;
+}
+
 /* Mobile */
 
-@media (max-width: 500px) {
-  .auth-page {
-    padding: 25px 18px;
+@media (max-width: 900px) {
+  .auth-visual {
+    display: none;
   }
 
+  .auth-form-panel {
+    padding: 35px 20px;
+  }
+}
+
+@media (max-width: 500px) {
   .form-row {
     flex-direction: column;
     gap: 0;

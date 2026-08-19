@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Spinner from "../components/Spinner"; // ✅ جديد
-import { notifySuccess, notifyError } from "../utils/notify"; // ✅ جديد
+import AuthVisualPanel from "../components/AuthVisualPanel";
+import PaperBackground from "../components/PaperBackground";
+import Spinner from "../components/Spinner";
+import { notifySuccess, notifyError } from "../utils/notify";
 
 function Login() {
   const navigate = useNavigate();
@@ -76,18 +78,18 @@ function Login() {
             data.code === "EMAIL_NOT_REGISTERED" ||
             data.error === "EMAIL_NOT_REGISTERED"
         ) {
-          notifyError("This email is not registered"); // ✅ جديد
+          notifyError("This email is not registered");
           navigate("/Register");
           return;
         }
 
-        const msg = data.message || "Invalid email or password"; // ✅ جديد: تخزين الرسالة بمتغير عشان نستخدمها مرتين
+        const msg = data.message || "Invalid email or password";
 
         setErrors({
           general: msg,
         });
 
-        notifyError(msg); // ✅ جديد
+        notifyError(msg);
 
         return;
       }
@@ -100,17 +102,17 @@ function Login() {
         }
       }
 
-      notifySuccess("Logged in successfully"); // ✅ جديد
+      notifySuccess("Logged in successfully");
       navigate("/Home");
 
     } catch (error) {
-      const msg = "Unable to connect to the server"; // ✅ جديد: تخزين الرسالة بمتغير عشان نستخدمها مرتين
+      const msg = "Unable to connect to the server";
 
       setErrors({
         general: msg,
       });
 
-      notifyError(msg); // ✅ جديد
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
@@ -118,100 +120,105 @@ function Login() {
 
   return (
       <div className="auth-page">
-        <div className="auth-container">
+        <PaperBackground />
+        <AuthVisualPanel />
 
-          <h1>Welcome back</h1>
+        <div className="auth-form-panel">
+          <div className="auth-container">
 
-          <p className="subtitle">
-            Sign in to your Waraq account
-          </p>
+            <h1>Welcome back</h1>
 
-          <div className="auth-tabs">
+            <p className="subtitle">
+              Sign in to your Waraq account
+            </p>
 
-            <button
-                className="tab"
-                onClick={() => navigate("/Register")}
-            >
-              Sign Up
-            </button>
+            <div className="auth-tabs">
 
-            <button
-                className="tab active"
-                onClick={() => navigate("/Login")}
-            >
-              Log In
-            </button>
+              <button
+                  className="tab"
+                  onClick={() => navigate("/Register")}
+              >
+                Sign Up
+              </button>
 
-          </div>
+              <button
+                  className="tab active"
+                  onClick={() => navigate("/Login")}
+              >
+                Log In
+              </button>
 
-          {errors.general && (
-              <div className="general-error">
-                {errors.general}
-              </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-
-            <div className="form-group">
-              <label>Email Address</label>
-
-              <input
-                  type="email"
-                  name="email"
-                  placeholder="ahmad@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-              />
-
-              {errors.email && (
-                  <span className="error">
-                {errors.email}
-              </span>
-              )}
             </div>
 
-            <div className="form-group">
-              <label>Password</label>
+            {errors.general && (
+                <div className="general-error">
+                  {errors.general}
+                </div>
+            )}
 
-              <input
-                  type="password"
-                  name="password"
-                  placeholder="Your password"
-                  value={form.password}
-                  onChange={handleChange}
-              />
+            <form onSubmit={handleSubmit}>
 
-              {errors.password && (
-                  <span className="error">
-                {errors.password}
-              </span>
-              )}
-            </div>
+              <div className="form-group">
+                <label>Email Address</label>
 
-            <div className="login-options">
-
-              <label className="remember-me">
                 <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={form.rememberMe}
+                    type="email"
+                    name="email"
+                    placeholder="ahmad@example.com"
+                    value={form.email}
                     onChange={handleChange}
                 />
-                <span>Remember me</span>
-              </label>
 
-            </div>
+                {errors.email && (
+                    <span className="error">
+                {errors.email}
+              </span>
+                )}
+              </div>
 
-            <button
-                className="primary-button"
-                type="submit"
-                disabled={loading}
-            >
-              {loading ? <Spinner /> : "Log In"} {/* ✅ معدّل */}
-            </button>
+              <div className="form-group">
+                <label>Password</label>
 
-          </form>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Your password"
+                    value={form.password}
+                    onChange={handleChange}
+                />
 
+                {errors.password && (
+                    <span className="error">
+                {errors.password}
+              </span>
+                )}
+              </div>
+
+              <div className="login-options">
+
+                <label className="remember-me">
+                  <input
+                      type="checkbox"
+                      name="rememberMe"
+                      checked={form.rememberMe}
+                      onChange={handleChange}
+                  />
+                  <span>Remember me</span>
+                </label>
+
+              </div>
+
+              <button
+                  className="primary-button"
+                  type="submit"
+                  disabled={loading}
+              >
+                {loading ? <Spinner /> : "Log In"}
+              </button>
+
+            </form>
+
+          </div>
         </div>
       </div>
   );
