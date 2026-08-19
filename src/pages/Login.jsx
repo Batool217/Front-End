@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../components/Spinner"; // ✅ جديد
+import { notifySuccess, notifyError } from "../utils/notify"; // ✅ جديد
 
 function Login() {
   const navigate = useNavigate();
@@ -57,30 +59,35 @@ function Login() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
+          "http://localhost:8080/api/auth/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(form),
+          }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
         if (
-          data.code === "EMAIL_NOT_REGISTERED" ||
-          data.error === "EMAIL_NOT_REGISTERED"
+            data.code === "EMAIL_NOT_REGISTERED" ||
+            data.error === "EMAIL_NOT_REGISTERED"
         ) {
+          notifyError("This email is not registered"); // ✅ جديد
           navigate("/Register");
           return;
         }
 
+        const msg = data.message || "Invalid email or password"; // ✅ جديد: تخزين الرسالة بمتغير عشان نستخدمها مرتين
+
         setErrors({
-          general: data.message || "Invalid email or password",
+          general: msg,
         });
+
+        notifyError(msg); // ✅ جديد
 
         return;
       }
@@ -93,115 +100,120 @@ function Login() {
         }
       }
 
+      notifySuccess("Logged in successfully"); // ✅ جديد
       navigate("/Home");
 
     } catch (error) {
+      const msg = "Unable to connect to the server"; // ✅ جديد: تخزين الرسالة بمتغير عشان نستخدمها مرتين
+
       setErrors({
-        general: "Unable to connect to the server",
+        general: msg,
       });
+
+      notifyError(msg); // ✅ جديد
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
+      <div className="auth-page">
+        <div className="auth-container">
 
-        <h1>Welcome back</h1>
+          <h1>Welcome back</h1>
 
-        <p className="subtitle">
-          Sign in to your Waraq account
-        </p>
+          <p className="subtitle">
+            Sign in to your Waraq account
+          </p>
 
-        <div className="auth-tabs">
+          <div className="auth-tabs">
 
-          <button
-            className="tab"
-            onClick={() => navigate("/Register")}
-          >
-            Sign Up
-          </button>
+            <button
+                className="tab"
+                onClick={() => navigate("/Register")}
+            >
+              Sign Up
+            </button>
 
-          <button
-            className="tab active"
-            onClick={() => navigate("/Login")}
-          >
-            Log In
-          </button>
+            <button
+                className="tab active"
+                onClick={() => navigate("/Login")}
+            >
+              Log In
+            </button>
 
-        </div>
-
-        {errors.general && (
-          <div className="general-error">
-            {errors.general}
           </div>
-        )}
 
-        <form onSubmit={handleSubmit}>
+          {errors.general && (
+              <div className="general-error">
+                {errors.general}
+              </div>
+          )}
 
-          <div className="form-group">
-            <label>Email Address</label>
+          <form onSubmit={handleSubmit}>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="ahmad@example.com"
-              value={form.email}
-              onChange={handleChange}
-            />
+            <div className="form-group">
+              <label>Email Address</label>
 
-            {errors.email && (
-              <span className="error">
+              <input
+                  type="email"
+                  name="email"
+                  placeholder="ahmad@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+              />
+
+              {errors.email && (
+                  <span className="error">
                 {errors.email}
               </span>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label>Password</label>
+            <div className="form-group">
+              <label>Password</label>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Your password"
-              value={form.password}
-              onChange={handleChange}
-            />
+              <input
+                  type="password"
+                  name="password"
+                  placeholder="Your password"
+                  value={form.password}
+                  onChange={handleChange}
+              />
 
-            {errors.password && (
-              <span className="error">
+              {errors.password && (
+                  <span className="error">
                 {errors.password}
               </span>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="login-options">
+            <div className="login-options">
 
-            <label className="remember-me">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={form.rememberMe}
-                onChange={handleChange}
-              />
-              <span>Remember me</span>
-            </label>
+              <label className="remember-me">
+                <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={form.rememberMe}
+                    onChange={handleChange}
+                />
+                <span>Remember me</span>
+              </label>
 
-          </div>
+            </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
+            <button
+                className="primary-button"
+                type="submit"
+                disabled={loading}
+            >
+              {loading ? <Spinner /> : "Log In"} {/* ✅ معدّل */}
+            </button>
 
-        </form>
+          </form>
 
+        </div>
       </div>
-    </div>
   );
 }
 
