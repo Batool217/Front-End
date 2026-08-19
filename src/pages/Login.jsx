@@ -1,160 +1,35 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
-function Login() {
+function Home() {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
-
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
-
-    setError("");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!form.email.trim()) {
-      setError("Email is required");
-      return;
-    }
-
-    if (!form.password) {
-      setError("Password is required");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (
-            data.code === "EMAIL_NOT_REGISTERED" ||
-            data.error === "EMAIL_NOT_REGISTERED"
-        ) {
-          navigate("/Register");
-          return;
-        }
-
-        setError(data.message || "Invalid email or password");
-        return;
-      }
-
-      if (data.token) {
-        const userData = data.user || { email: form.email };
-        login(userData, data.token);
-      }
-
-      navigate("/Home");
-    } catch (err) {
-      setError("Unable to connect to the server");
-    } finally {
-      setLoading(false);
-    }
+  const handleLogout = () => {
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
-      <div className="auth-page">
-        <div className="auth-container">
-          <h1>Welcome back</h1>
+    <div style={{ padding: "40px" }}>
+      <h1>Welcome to Waraq 📚</h1>
+      <p>You are successfully logged in.</p>
 
-          <p className="subtitle">Sign in to your Waraq account</p>
-
-          <div className="auth-tabs">
-            <button className="tab" onClick={() => navigate("/Register")}>
-              Sign Up
-            </button>
-
-            <button className="tab active" onClick={() => navigate("/Login")}>
-              Log In
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Email Address</label>
-
-              <input
-                  type="email"
-                  name="email"
-                  placeholder="ahmad@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-
-              <input
-                  type="password"
-                  name="password"
-                  placeholder="Your password"
-                  value={form.password}
-                  onChange={handleChange}
-              />
-
-              {error && <span className="error">{error}</span>}
-            </div>
-
-            <div className="login-options">
-              <label className="remember-me">
-                <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={form.rememberMe}
-                    onChange={handleChange}
-                />
-
-                <span>Remember me</span>
-              </label>
-
-              <button
-                  type="button"
-                  className="forgot-link"
-                  onClick={() => navigate("/ForgotPassword")}
-              >
-                Forgot password?
-              </button>
-            </div>
-
-            <button
-                className="primary-button"
-                type="submit"
-                disabled={loading}
-            >
-              {loading ? "Logging in..." : "Log In"}
-            </button>
-          </form>
-        </div>
-      </div>
+      <button
+        onClick={handleLogout}
+        style={{
+          marginTop: "20px",
+          padding: "10px 18px",
+          backgroundColor: "#dc3545",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        Log Out
+      </button>
+    </div>
   );
 }
 
-export default Login;
+export default Home;
