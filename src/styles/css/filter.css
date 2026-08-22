@@ -1,0 +1,192 @@
+/* ============================================
+   AcademicFilter — filter.css
+   Place at: src/styles/css/filter.css
+   ============================================ */
+
+.academic-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    box-sizing: border-box;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---- Section group ---- */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* ---- Checkboxes ---- */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #333333;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Hide native checkbox */
+.checkbox-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Custom checkbox box */
+.checkbox-custom {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 1.8px solid #cccccc;
+    border-radius: 4px;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+    background: #f59e0b;
+    border-color: #f59e0b;
+}
+
+/* Checkmark via pseudo-element */
+.checkbox-input:checked + .checkbox-custom::after {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 8px;
+    border: 2px solid #ffffff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+}
+
+.checkbox-label:hover .checkbox-custom {
+    border-color: #f59e0b;
+}
+
+/* ---- Select dropdowns ---- */
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 10px 40px 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: #ffffff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.filter-select:hover {
+    border-color: #c0c0c0;
+}
+
+.filter-select:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    color: #888888;
+    display: flex;
+    align-items: center;
+}
+
+.select-wrapper:focus-within .select-arrow {
+    color: #f59e0b;
+}
+
+/* ---- Action buttons ---- */
+.filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.clear-filters-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: #f59e0b;
+    text-decoration: none;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.clear-filters-btn:hover {
+    color: #d97706;
+    opacity: 0.85;
+}
+
+.apply-filters-btn {
+    flex: 1;
+    padding: 11px 20px;
+    background: #f59e0b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.apply-filters-btn:hover {
+    background: #d97706;
+}
+
+.apply-filters-btn:active {
+    transform: scale(0.98);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+    .academic-filter {
+        max-width: 100%;
+        padding: 16px;
+    }
+}
