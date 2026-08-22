@@ -1,0 +1,53 @@
+.recent-listings {
+    padding: 24px;
+}
+
+.listings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.listings-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.listings-title h2 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.results-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: #f8fafc;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.view-all {
+    color: #ea580c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.listings-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 1024px) {
+    .listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .listings-grid {
+        grid-template-columns: 1fr;
+    }
+}
