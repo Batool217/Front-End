@@ -1,68 +1,86 @@
-import React, { useState } from 'react';
-import AcademicFilter from './AcademicFilter';
-import GeneralFilter from './GeneralFilter';
-import '../styles/css/filter.css';
+import { useState } from "react";
+import AcademicFilter from "./AcademicFilter";
+import GeneralFilter from "./GeneralFilter";
+import "../styles/css/filter.css";
 
-const FilterModal = ({ isOpen, onClose }) => {
-    const [activeTab, setActiveTab] = useState('All');
+export default function FilterModal({ isOpen, onClose, onFilterChange }) {
+    const [activeTab, setActiveTab] = useState("Academic");
+    const [filtersState, setFiltersState] = useState({
+        academic: { university: "", faculty: "", major: "" },
+        general: { type: "" },
+    });
 
-    if (!isOpen) {
-        return null;
-    }
+    if (!isOpen) return null;
 
-    const renderTabContent = () => {
-        if (activeTab === 'Academic') {
-            return <AcademicFilter />;
+    const handleAcademicChange = (academicData) => {
+        const updated = { ...filtersState, academic: academicData };
+        setFiltersState(updated);
+        if (onFilterChange) {
+            onFilterChange({ activeTab, ...updated });
         }
+    };
 
-        if (activeTab === 'General') {
-            return <GeneralFilter />;
+    const handleGeneralChange = (generalData) => {
+        const updated = { ...filtersState, general: generalData };
+        setFiltersState(updated);
+        if (onFilterChange) {
+            onFilterChange({ activeTab, ...updated });
         }
+    };
 
-        return <div>All Filters</div>;
+    const handleTabSwitch = (tab) => {
+        setActiveTab(tab);
+        if (onFilterChange) {
+            onFilterChange({ activeTab: tab, ...filtersState });
+        }
     };
 
     return (
-        <div className="filter-modal">
-            <div className="filter-tabs">
-                <button
-                    type="button"
-                    className={activeTab === 'All' ? 'active' : ''}
-                    onClick={() => setActiveTab('All')}
-                >
-                    All
-                </button>
+        <>
+            {/* Click-outside backdrop */}
+            <div className="filter-modal-backdrop" onClick={onClose} />
 
-                <button
-                    type="button"
-                    className={activeTab === 'Academic' ? 'active' : ''}
-                    onClick={() => setActiveTab('Academic')}
-                >
-                    Academic
-                </button>
+            <div className="filter-modal-container">
+                {/* Tab Switcher Header */}
+                <div className="filter-tabs">
+                    {["Academic", "General", "All"].map((tab) => (
+                        <button
+                            key={tab}
+                            type="button"
+                            className={`filter-tab-btn ${activeTab === tab ? "active" : ""}`}
+                            onClick={() => handleTabSwitch(tab)}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
 
-                <button
-                    type="button"
-                    className={activeTab === 'General' ? 'active' : ''}
-                    onClick={() => setActiveTab('General')}
-                >
-                    General
-                </button>
+                {/* Tab Content Body */}
+                <div className="filter-modal-body">
+                    {activeTab === "Academic" && (
+                        <AcademicFilter onFilterChange={handleAcademicChange} />
+                    )}
+
+                    {activeTab === "General" && (
+                        <GeneralFilter onFilterChange={handleGeneralChange} />
+                    )}
+
+                    {activeTab === "All" && (
+                        <div className="all-filters-wrapper">
+                            <AcademicFilter onFilterChange={handleAcademicChange} />
+                            <div className="filter-divider" />
+                            <GeneralFilter onFilterChange={handleGeneralChange} />
+                        </div>
+                    )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="filter-modal-footer">
+                    <button type="button" className="close-filter-btn" onClick={onClose}>
+                        Close
+                    </button>
+                </div>
             </div>
-
-            <div className="filter-content">
-                {renderTabContent()}
-            </div>
-
-            <button
-                type="button"
-                className="close-filter"
-                onClick={onClose}
-            >
-                Close
-            </button>
-        </div>
+        </>
     );
-};
-
-export default FilterModal;
+}

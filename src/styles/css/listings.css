@@ -1,5 +1,6 @@
 .recent-listings {
-    padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .listings-header {
@@ -17,37 +18,35 @@
 
 .listings-title h2 {
     margin: 0;
-    color: #0f172a;
+    color: #12345b;
+    font-size: 22px;
+    font-weight: 700;
 }
 
 .results-badge {
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 999px;
-    background-color: #f8fafc;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     color: #64748b;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .view-all {
-    color: #ea580c;
+    color: #ff851b;
     text-decoration: none;
     font-weight: 600;
+    font-size: 14px;
+}
+
+.view-all:hover {
+    text-decoration: underline;
 }
 
 .listings-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-@media (max-width: 1024px) {
-    .listings-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .listings-grid {
-        grid-template-columns: 1fr;
-    }
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    width: 100%;
 }
