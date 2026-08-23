@@ -39,7 +39,7 @@ const DEFAULT_FILTERS = {
     subject: "",
 };
 
-export default function AcademicFilter({ onSelectFilter, onClear }) {
+export default function AcademicFilter({ isOpen = true, onClose, onSelectFilter, onClear }) {
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
     const handleLevelChange = (level) => {
@@ -60,113 +60,111 @@ export default function AcademicFilter({ onSelectFilter, onClear }) {
 
     const handleApply = () => {
         if (onSelectFilter) onSelectFilter(filters);
+        if (onClose) onClose();
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className="academic-filter">
-            {/* Level Checkboxes */}
-            <div className="filter-group">
-                <span className="filter-label">Level</span>
-                <div className="checkbox-grid">
-                    {LEVELS.map((level) => (
-                        <label key={level} className="checkbox-label">
-                            <input
-                                type="checkbox"
-                                className="checkbox-input"
-                                checked={filters.levels.includes(level)}
-                                onChange={() => handleLevelChange(level)}
-                            />
-                            <span className="checkbox-custom" />
-                            {level}
-                        </label>
-                    ))}
-                </div>
-            </div>
+        <>
+            {/* Backdrop overlay */}
+            {onClose && <div className="filter-backdrop" onClick={onClose} />}
 
-            {/* University Dropdown */}
-            <div className="filter-group">
-                <span className="filter-label">University</span>
-                <div className="select-wrapper">
-                    <select
-                        className="filter-select"
-                        value={filters.university}
-                        onChange={(e) => handleDropdownChange("university", e.target.value)}
-                    >
-                        <option value="">All Universities</option>
-                        {FILTER_OPTIONS.university.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
+            <div className={`academic-filter-container ${onClose ? "filter-drawer" : ""}`}>
+                {/* Header */}
+                <div className="filter-header">
+                    <h3>Academic Filter</h3>
+                    {onClose && (
+                        <button className="filter-close-btn" onClick={onClose} aria-label="Close">
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                {/* Level Checkboxes */}
+                <div className="filter-group">
+                    <label className="filter-group-title">Degree Level</label>
+                    <div className="checkbox-grid">
+                        {LEVELS.map((level) => (
+                            <label key={level} className="checkbox-pill">
+                                <input
+                                    type="checkbox"
+                                    checked={filters.levels.includes(level)}
+                                    onChange={() => handleLevelChange(level)}
+                                />
+                                <span>{level}</span>
+                            </label>
                         ))}
-                    </select>
-                    <span className="select-arrow" aria-hidden="true">
-            <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.8"
-                    strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
+                    </div>
+                </div>
+
+                {/* University Dropdown */}
+                <div className="filter-group">
+                    <label className="filter-group-title">University</label>
+                    <div className="select-wrapper">
+                        <select
+                            className="filter-select"
+                            value={filters.university}
+                            onChange={(e) => handleDropdownChange("university", e.target.value)}
+                        >
+                            <option value="">All Universities</option>
+                            {FILTER_OPTIONS.university.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Faculty Dropdown */}
+                <div className="filter-group">
+                    <label className="filter-group-title">Faculty / College</label>
+                    <div className="select-wrapper">
+                        <select
+                            className="filter-select"
+                            value={filters.faculty}
+                            onChange={(e) => handleDropdownChange("faculty", e.target.value)}
+                        >
+                            <option value="">All Faculties</option>
+                            {FILTER_OPTIONS.faculty.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Subject Dropdown */}
+                <div className="filter-group">
+                    <label className="filter-group-title">Subject / Major</label>
+                    <div className="select-wrapper">
+                        <select
+                            className="filter-select"
+                            value={filters.subject}
+                            onChange={(e) => handleDropdownChange("subject", e.target.value)}
+                        >
+                            <option value="">All Subjects</option>
+                            {FILTER_OPTIONS.subject.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="filter-actions">
+                    <button className="clear-filters-btn" onClick={handleClear} type="button">
+                        Reset
+                    </button>
+                    <button className="apply-filters-btn" onClick={handleApply} type="button">
+                        Apply Filters
+                    </button>
                 </div>
             </div>
-
-            {/* Faculty / College Dropdown */}
-            <div className="filter-group">
-                <span className="filter-label">Faculty / College</span>
-                <div className="select-wrapper">
-                    <select
-                        className="filter-select"
-                        value={filters.faculty}
-                        onChange={(e) => handleDropdownChange("faculty", e.target.value)}
-                    >
-                        <option value="">All Faculties</option>
-                        {FILTER_OPTIONS.faculty.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="select-arrow" aria-hidden="true">
-            <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.8"
-                    strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-                </div>
-            </div>
-
-            {/* Subject Dropdown */}
-            <div className="filter-group">
-                <span className="filter-label">Subject</span>
-                <div className="select-wrapper">
-                    <select
-                        className="filter-select"
-                        value={filters.subject}
-                        onChange={(e) => handleDropdownChange("subject", e.target.value)}
-                    >
-                        <option value="">All Subjects</option>
-                        {FILTER_OPTIONS.subject.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="select-arrow" aria-hidden="true">
-            <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-              <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.8"
-                    strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-                </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="filter-actions">
-                <button className="clear-filters-btn" onClick={handleClear} type="button">
-                    Clear Filters
-                </button>
-                <button className="apply-filters-btn" onClick={handleApply} type="button">
-                    Apply Filters
-                </button>
-            </div>
-        </div>
+        </>
     );
 }

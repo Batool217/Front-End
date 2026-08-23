@@ -3,7 +3,7 @@ export const mockBooks = [
         id: 1,
         title: 'Organic Chemistry',
         tag: '',
-        image: 'https://images.unsplash.com/photo-1532012164546-f432f2e3edd4?w=500'
+        image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=500&q=80'
     },
     {
         id: 2,
@@ -13,7 +13,7 @@ export const mockBooks = [
     },
     {
         id: 3,
-        title: 'ألف شمس مشرقة',
+        title: 'ألف شمس ساطعة',
         tag: '',
         image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500'
     },
