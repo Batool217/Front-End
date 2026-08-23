@@ -1,61 +1,132 @@
 .hero-banner {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #0f172a;
-    border-radius: 16px;
-    padding: 40px;
+    background: linear-gradient(135deg, #182e4b 0%, #112237 100%);
+    border-radius: 24px;
+    padding: 52px 64px;
     color: #ffffff;
-    margin: 20px 0;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(18, 52, 91, 0.12);
 }
 
+/* Polished Ambient Circles with Soft Radial Gradients */
+.hero-bg-circle-center {
+    position: absolute;
+    top: -40px;
+    left: 48%;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.045) 0%,
+            rgba(255, 255, 255, 0.015) 55%,
+            transparent 72%
+    );
+    filter: blur(12px);
+    pointer-events: none;
+}
+
+.hero-bg-circle-right {
+    position: absolute;
+    bottom: -70px;
+    right: 60px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(
+            circle,
+            rgba(10, 19, 32, 0.75) 0%,
+            rgba(10, 19, 32, 0.3) 60%,
+            transparent 75%
+    );
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+/* Left Content */
 .hero-content {
-    max-width: 600px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    max-width: 560px;
 }
 
 .hero-tagline {
     color: #ea580c;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    display: block;
-    margin-bottom: 12px;
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
 }
 
 .hero-title {
-    font-size: 36px;
+    color: #ffffff;
+    font-size: 35px;
     font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
+    line-height: 1.22;
+    margin: 0 0 14px 0;
+    text-align: left;
+    letter-spacing: -0.5px;
 }
 
 .hero-subtitle {
-    color: #64748b;
-    font-size: 16px;
-    margin-bottom: 24px;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 400;
+    margin: 0 0 28px 0;
+    text-align: left;
 }
 
+/* Action Button */
 .add-book-btn {
-    background-color: #ea580c;
+    background-color: #f97316;
     color: #ffffff;
     border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 13px 30px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.32);
+    transition: all 0.2s ease;
 }
 
 .add-book-btn:hover {
-    background-color: #f97316;
-    opacity: 0.9;
+    background-color: #ea580c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.42);
 }
 
-.hero-image {
-    font-size: 80px;
+/* Right Illustration */
+.hero-graphic-wrapper {
+    position: relative;
+    z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-right: 16px;
+}
+
+.hero-books-svg {
+    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.35));
+    user-select: none;
+}
+
+@media (max-width: 850px) {
+    .hero-banner {
+        flex-direction: column;
+        padding: 32px 24px;
+        gap: 28px;
+    }
+
+    .hero-graphic-wrapper {
+        margin-right: 0;
+    }
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import HeroBanner from "../components/HeroBanner";
 import RecentListings from "../components/RecentListings";
 import AcademicFilter from "../components/AcademicFilter";
 
@@ -13,6 +14,10 @@ function Home() {
         navigate("/login");
     };
 
+    const handleAddBook = () => {
+        console.log("Open Add Book Modal / Navigate to Create Listing");
+    };
+
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#f8fafc", padding: "30px 40px" }}>
             {/* Top Header */}
@@ -22,7 +27,7 @@ function Home() {
                     justifyContent: "space-between",
                     alignItems: "center",
                     maxWidth: "1200px",
-                    margin: "0 auto 30px auto",
+                    margin: "0 auto 20px auto",
                     paddingBottom: "16px",
                     borderBottom: "1px solid #e2e8f0",
                 }}
@@ -37,7 +42,6 @@ function Home() {
                 </div>
 
                 <div style={{ display: "flex", gap: "12px" }}>
-                    {/* Filter Toggle Button */}
                     <button
                         onClick={() => setIsFilterOpen(true)}
                         style={{
@@ -77,8 +81,12 @@ function Home() {
                 onSelectFilter={(filters) => console.log("Selected:", filters)}
             />
 
-            {/* Main Grid */}
-            <main style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            {/* Main Content Area */}
+            <main style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "32px" }}>
+                {/* Seba's Hero Banner */}
+                <HeroBanner onAddBook={handleAddBook} />
+
+                {/* Listings Section */}
                 <RecentListings />
             </main>
         </div>
