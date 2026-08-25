@@ -1,56 +1,135 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/css/filter.css";
 
-const UNIVERSITIES = [
-    { value: "uoj", label: "University of Jordan" },
-    { value: "just", label: "Jordan University of Science & Technology" },
-    { value: "yu", label: "Yarmouk University" },
-    { value: "hu", label: "Hashemite University" },
-    { value: "bau", label: "Al-Balqa Applied University" },
-    { value: "mutah", label: "Mutah University" },
-];
-
-const FACULTIES = [
-    { value: "it", label: "Faculty of Information Technology" },
-    { value: "engineering", label: "Faculty of Engineering" },
-    { value: "science", label: "Faculty of Science" },
-    { value: "business", label: "Faculty of Business" },
-    { value: "medicine", label: "Faculty of Medicine" },
-    { value: "arts", label: "Faculty of Arts" },
-];
-
-const MAJORS = [
-    { value: "cs", label: "Computer Science" },
-    { value: "cis", label: "Computer Information Systems" },
-    { value: "se", label: "Software Engineering" },
-    { value: "ai", label: "Artificial Intelligence" },
-    { value: "cyber", label: "Cybersecurity" },
-    { value: "ce", label: "Computer Engineering" },
-];
-
 export default function AcademicFilter({ onFilterChange, onClear }) {
-    const [academicFilters, setAcademicFilters] = useState({
-        university: "",
-        faculty: "",
-        major: "",
-    });
+    const [universities, setUniversities] = useState([]);
+    const [faculties, setFaculties] = useState([]);
+    const [majors, setMajors] = useState([]);
 
-    const handleChange = (field, value) => {
-        const updated = { ...academicFilters, [field]: value };
-        setAcademicFilters(updated);
+    const [selectedUniversity, setSelectedUniversity] = useState("");
+    const [selectedFaculty, setSelectedFaculty] = useState("");
+    const [selectedMajor, setSelectedMajor] = useState("");
+
+    // 1. Fetch Universities on mount
+    useEffect(() => {
+        let isMounted = true;
+
+        fetch("http://localhost:8080/api/universities")
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data) => {
+                if (isMounted) {
+                    setUniversities(Array.isArray(data) ? data : []);
+                }
+            })
+            .catch((err) => {
+                console.error("Error loading universities:", err);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    // 2. Fetch Faculties on university change
+    useEffect(() => {
+        if (!selectedUniversity) return;
+
+        let isMounted = true;
+
+        fetch(`http://localhost:8080/api/faculties?university_id=${selectedUniversity}`)
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data) => {
+                if (isMounted) {
+                    setFaculties(Array.isArray(data) ? data : []);
+                }
+            })
+            .catch((err) => {
+                console.error("Error loading faculties:", err);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedUniversity]);
+
+    // 3. Fetch Majors on faculty change
+    useEffect(() => {
+        if (!selectedFaculty) return;
+
+        let isMounted = true;
+
+        fetch(`http://localhost:8080/api/majors?faculty_id=${selectedFaculty}`)
+            .then((res) => (res.ok ? res.json() : []))
+            .then((data) => {
+                if (isMounted) {
+                    setMajors(Array.isArray(data) ? data : []);
+                }
+            })
+            .catch((err) => {
+                console.error("Error loading majors:", err);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [selectedFaculty]);
+
+    const handleUniversityChange = (e) => {
+        const universityId = e.target.value;
+        setSelectedUniversity(universityId);
+        setSelectedFaculty("");
+        setSelectedMajor("");
+        setFaculties([]);
+        setMajors([]);
+
         if (onFilterChange) {
-            onFilterChange(updated);
+            onFilterChange({
+                universityId: universityId || "",
+                facultyId: "",
+                majorId: "",
+            });
+        }
+    };
+
+    const handleFacultyChange = (e) => {
+        const facultyId = e.target.value;
+        setSelectedFaculty(facultyId);
+        setSelectedMajor("");
+        setMajors([]);
+
+        if (onFilterChange) {
+            onFilterChange({
+                universityId: selectedUniversity,
+                facultyId: facultyId || "",
+                majorId: "",
+            });
+        }
+    };
+
+    const handleMajorChange = (e) => {
+        const majorId = e.target.value;
+        setSelectedMajor(majorId);
+
+        if (onFilterChange) {
+            onFilterChange({
+                universityId: selectedUniversity,
+                facultyId: selectedFaculty,
+                majorId: majorId || "",
+            });
         }
     };
 
     const handleClear = () => {
-        const reset = { university: "", faculty: "", major: "" };
-        setAcademicFilters(reset);
-        if (onFilterChange) {
-            onFilterChange(reset);
-        }
+        setSelectedUniversity("");
+        setSelectedFaculty("");
+        setSelectedMajor("");
+        setFaculties([]);
+        setMajors([]);
+
         if (onClear) {
             onClear();
+        } else if (onFilterChange) {
+            onFilterChange({ universityId: "", facultyId: "", majorId: "" });
         }
     };
 
@@ -61,13 +140,13 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
                 <label className="filter-field-label">University</label>
                 <div className="filter-select-box">
                     <select
-                        value={academicFilters.university}
-                        onChange={(e) => handleChange("university", e.target.value)}
+                        value={selectedUniversity}
+                        onChange={handleUniversityChange}
                     >
                         <option value="">Select university</option>
-                        {UNIVERSITIES.map((item) => (
-                            <option key={item.value} value={item.value}>
-                                {item.label}
+                        {universities.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
                             </option>
                         ))}
                     </select>
@@ -79,13 +158,16 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
                 <label className="filter-field-label">Faculty</label>
                 <div className="filter-select-box">
                     <select
-                        value={academicFilters.faculty}
-                        onChange={(e) => handleChange("faculty", e.target.value)}
+                        value={selectedFaculty}
+                        onChange={handleFacultyChange}
+                        disabled={!selectedUniversity}
                     >
-                        <option value="">Select faculty</option>
-                        {FACULTIES.map((item) => (
-                            <option key={item.value} value={item.value}>
-                                {item.label}
+                        <option value="">
+                            {!selectedUniversity ? "Select university first" : "Select faculty"}
+                        </option>
+                        {faculties.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
                             </option>
                         ))}
                     </select>
@@ -97,13 +179,16 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
                 <label className="filter-field-label">Major</label>
                 <div className="filter-select-box">
                     <select
-                        value={academicFilters.major}
-                        onChange={(e) => handleChange("major", e.target.value)}
+                        value={selectedMajor}
+                        onChange={handleMajorChange}
+                        disabled={!selectedFaculty}
                     >
-                        <option value="">Select major</option>
-                        {MAJORS.map((item) => (
-                            <option key={item.value} value={item.value}>
-                                {item.label}
+                        <option value="">
+                            {!selectedFaculty ? "Select faculty first" : "Select major"}
+                        </option>
+                        {majors.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
                             </option>
                         ))}
                     </select>

@@ -1,24 +1,36 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import HeroBanner from "../components/HeroBanner";
 import RecentListings from "../components/RecentListings";
 import PaperBackground from "../components/PaperBackground";
 import Navbar from "../components/Navbar";
+import AddBookModal from "../components/AddBookModal";
 
 export default function Home() {
     const navigate = useNavigate();
+    const { isAuthenticated, logout } = useAuth();
 
-    const handleLogout = () => {
-        sessionStorage.removeItem("token");
-        localStorage.removeItem("token");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filters, setFilters] = useState({});
+    const [isAddBookOpen, setIsAddBookOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const handleLogout = async () => {
+        await logout();
         navigate("/login");
     };
 
-    const handleAddBook = () => {
-        console.log("Open Add Book Modal / Navigate to Create Listing");
+    const handleAddBookClick = () => {
+        if (!isAuthenticated) {
+            navigate("/login");
+            return;
+        }
+        setIsAddBookOpen(true);
     };
 
-    const handleFilterUpdate = (filters) => {
-        console.log("Active Filters:", filters);
+    const handleBookCreated = () => {
+        setRefreshTrigger((prev) => prev + 1);
     };
 
     return (
@@ -38,8 +50,8 @@ export default function Home() {
             {/* Top Navigation Bar */}
             <div style={{ position: "relative", zIndex: 100, margin: "0 0 28px 0" }}>
                 <Navbar
-                    onSearch={(query) => console.log("Searching:", query)}
-                    onFilterChange={handleFilterUpdate}
+                    onSearch={(query) => setSearchQuery(query)}
+                    onFilterChange={(newFilters) => setFilters(newFilters)}
                     onLogout={handleLogout}
                 />
             </div>
@@ -55,9 +67,20 @@ export default function Home() {
                     gap: "32px",
                 }}
             >
-                <HeroBanner onAddBook={handleAddBook} />
-                <RecentListings />
+                <HeroBanner onAddBook={handleAddBookClick} />
+                <RecentListings
+                    searchQuery={searchQuery}
+                    filters={filters}
+                    refreshTrigger={refreshTrigger}
+                />
             </main>
+
+            {/* Add Book Modal Form */}
+            <AddBookModal
+                isOpen={isAddBookOpen}
+                onClose={() => setIsAddBookOpen(false)}
+                onBookAdded={handleBookCreated}
+            />
         </div>
     );
 }
