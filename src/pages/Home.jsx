@@ -1,35 +1,86 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import HeroBanner from "../components/HeroBanner";
+import RecentListings from "../components/RecentListings";
+import PaperBackground from "../components/PaperBackground";
+import Navbar from "../components/Navbar";
+import AddBookModal from "../components/AddBookModal";
 
-function Home() {
-  const navigate = useNavigate();
+export default function Home() {
+    const navigate = useNavigate();
+    const { isAuthenticated, logout } = useAuth();
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filters, setFilters] = useState({});
+    const [isAddBookOpen, setIsAddBookOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>Welcome to Waraq 📚</h1>
-      <p>You are successfully logged in.</p>
+    const handleLogout = async () => {
+        await logout();
+        navigate("/login");
+    };
 
-      <button
-        onClick={handleLogout}
-        style={{
-          marginTop: "20px",
-          padding: "10px 18px",
-          backgroundColor: "#dc3545",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-        }}
-      >
-        Log Out
-      </button>
-    </div>
-  );
+    const handleAddBookClick = () => {
+        if (!isAuthenticated) {
+            navigate("/login");
+            return;
+        }
+        setIsAddBookOpen(true);
+    };
+
+    const handleBookCreated = () => {
+        setRefreshTrigger((prev) => prev + 1);
+    };
+
+    return (
+        <div
+            style={{
+                position: "relative",
+                width: "100%",
+                minHeight: "100vh",
+                overflowX: "hidden",
+                padding: "24px 48px 64px 48px",
+                boxSizing: "border-box",
+            }}
+        >
+            {/* Floating Ambient Background */}
+            <PaperBackground />
+
+            {/* Top Navigation Bar */}
+            <div style={{ position: "relative", zIndex: 100, margin: "0 0 28px 0" }}>
+                <Navbar
+                    onSearch={(query) => setSearchQuery(query)}
+                    onFilterChange={(newFilters) => setFilters(newFilters)}
+                    onLogout={handleLogout}
+                />
+            </div>
+
+            {/* Main Content Area */}
+            <main
+                style={{
+                    position: "relative",
+                    zIndex: 1,
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "32px",
+                }}
+            >
+                <HeroBanner onAddBook={handleAddBookClick} />
+                <RecentListings
+                    searchQuery={searchQuery}
+                    filters={filters}
+                    refreshTrigger={refreshTrigger}
+                />
+            </main>
+
+            {/* Add Book Modal Form */}
+            <AddBookModal
+                isOpen={isAddBookOpen}
+                onClose={() => setIsAddBookOpen(false)}
+                onBookAdded={handleBookCreated}
+            />
+        </div>
+    );
 }
-
-export default Home;
