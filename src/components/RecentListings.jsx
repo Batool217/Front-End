@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import BookCard from "./BookCard";
 import "../styles/css/listings.css";
 
 function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) {
+    const navigate = useNavigate();
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -106,7 +108,7 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
                             coverImage={book.coverImage || (book.imagesUrl && book.imagesUrl[0])}
                             type={book.type}
                             category={book.category}
-                            onClick={(id) => console.log("Clicked book id:", id)}
+                            onClick={(id) => navigate(`/listings/${id}`)}
                         />
                     ))}
                 </div>
