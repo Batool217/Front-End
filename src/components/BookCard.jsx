@@ -1,20 +1,32 @@
 import "../styles/css/card.css";
 
-function BookCard({ id, title, image, tag, onClick }) {
+function BookCard({ id, title, coverImage, price, type, category, onClick }) {
+    const defaultCover = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80";
+    const displayImage = coverImage || defaultCover;
+    const tag = type || (category === "academic" ? "Academic" : null);
+
     return (
-        <div className="book-card" onClick={() => onClick(id)}>
+        <div className="book-card" onClick={() => onClick && onClick(id)}>
             <div className="book-image-wrapper">
                 {tag && <span className="book-tag">{tag}</span>}
-
                 <img
-                    src={image}
+                    src={displayImage}
                     alt={title}
                     className="book-image"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultCover;
+                    }}
                 />
             </div>
 
             <div className="book-info">
                 <h3 className="book-title">{title}</h3>
+                {price !== undefined && price !== null && (
+                    <div style={{ marginTop: "6px", fontSize: "14px", fontWeight: "700", color: "#f97316" }}>
+                        {Number(price).toFixed(2)} JOD
+                    </div>
+                )}
             </div>
         </div>
     );

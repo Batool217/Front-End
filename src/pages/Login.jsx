@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import AuthVisualPanel from "../components/AuthVisualPanel";
 import PaperBackground from "../components/PaperBackground";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -58,16 +60,16 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-          "http://localhost:8080/api/auth/login",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(form),
-          }
-      );
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+        }),
+      });
 
       const data = await response.json();
 
@@ -83,20 +85,18 @@ function Login() {
         setErrors({
           general: data.message || "Invalid email or password",
         });
-
         return;
       }
 
-      if (data.token) {
-        if (form.rememberMe) {
-          localStorage.setItem("token", data.token);
-        } else {
-          sessionStorage.setItem("token", data.token);
-        }
-      }
+      const userData = {
+        userId: data.userId,
+        name: data.name,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+      };
 
+      login(userData, data.token, form.rememberMe);
       navigate("/Home");
-
     } catch {
       setErrors({
         general: "Unable to connect to the server",
@@ -113,42 +113,27 @@ function Login() {
         <div className="auth-form-panel">
           <PaperBackground />
           <div className="auth-container">
-
             <h1>Welcome back</h1>
 
-            <p className="subtitle">
-              Sign in to your Waraq account
-            </p>
+            <p className="subtitle">Sign in to your Waraq account</p>
 
             <div className="auth-tabs">
-
-              <button
-                  className="tab"
-                  onClick={() => navigate("/Register")}
-              >
+              <button className="tab" onClick={() => navigate("/Register")}>
                 Sign Up
               </button>
 
-              <button
-                  className="tab active"
-                  onClick={() => navigate("/Login")}
-              >
+              <button className="tab active" onClick={() => navigate("/Login")}>
                 Log In
               </button>
-
             </div>
 
             {errors.general && (
-                <div className="general-error">
-                  {errors.general}
-                </div>
+                <div className="general-error">{errors.general}</div>
             )}
 
             <form onSubmit={handleSubmit}>
-
               <div className="form-group">
                 <label>Email Address</label>
-
                 <input
                     type="email"
                     name="email"
@@ -156,17 +141,11 @@ function Login() {
                     value={form.email}
                     onChange={handleChange}
                 />
-
-                {errors.email && (
-                    <span className="error">
-                {errors.email}
-              </span>
-                )}
+                {errors.email && <span className="error">{errors.email}</span>}
               </div>
 
               <div className="form-group">
                 <label>Password</label>
-
                 <input
                     type="password"
                     name="password"
@@ -174,16 +153,12 @@ function Login() {
                     value={form.password}
                     onChange={handleChange}
                 />
-
                 {errors.password && (
-                    <span className="error">
-                {errors.password}
-              </span>
+                    <span className="error">{errors.password}</span>
                 )}
               </div>
 
               <div className="login-options">
-
                 <label className="remember-me">
                   <input
                       type="checkbox"
@@ -197,7 +172,6 @@ function Login() {
                 <a className="forgot-link" href="#">
                   Forgot password?
                 </a>
-
               </div>
 
               <button
@@ -207,9 +181,7 @@ function Login() {
               >
                 {loading ? "Logging in..." : "Log In"}
               </button>
-
             </form>
-
           </div>
         </div>
       </div>

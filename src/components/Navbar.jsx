@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import FilterModal from './FilterModal';
 import '../styles/css/navbar.css';
 
-const Navbar = ({ onSearch, onFilterChange, onLogout }) => {
+const Navbar = ({ onSearch, onFilterChange }) => {
     const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useAuth();
+
     const [query, setQuery] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -34,6 +37,15 @@ const Navbar = ({ onSearch, onFilterChange, onLogout }) => {
             listingsElement.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    const handleLogoutClick = async () => {
+        setIsProfileOpen(false);
+        await logout();
+        navigate('/login');
+    };
+
+    const displayName = user?.name || "User";
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff`;
 
     return (
         <header className="navbar">
@@ -97,33 +109,45 @@ const Navbar = ({ onSearch, onFilterChange, onLogout }) => {
                     Browse
                 </button>
 
-                <div className="avatar-wrapper" ref={profileRef}>
-                    <div
-                        className="avatar-container"
-                        onClick={() => setIsProfileOpen((prev) => !prev)}
-                        title="Account Menu"
-                    >
-                        <img src="https://ui-avatars.com/api/?name=User&background=f97316&color=fff" alt="User Profile" />
-                    </div>
-
-                    {isProfileOpen && (
-                        <div className="profile-dropdown">
-                            <div className="profile-dropdown-header">
-                                <strong>My Account</strong>
-                            </div>
-                            <button
-                                type="button"
-                                className="dropdown-logout-btn"
-                                onClick={() => {
-                                    setIsProfileOpen(false);
-                                    if (onLogout) onLogout();
-                                }}
-                            >
-                                Log Out
-                            </button>
+                {isAuthenticated ? (
+                    <div className="avatar-wrapper" ref={profileRef}>
+                        <div
+                            className="avatar-container"
+                            onClick={() => setIsProfileOpen((prev) => !prev)}
+                            title={displayName}
+                        >
+                            <img src={avatarUrl} alt={displayName} />
                         </div>
-                    )}
-                </div>
+
+                        {isProfileOpen && (
+                            <div className="profile-dropdown">
+                                <div className="profile-dropdown-header">
+                                    <strong>{displayName}</strong>
+                                    {user?.email && (
+                                        <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>
+                                            {user.email}
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="dropdown-logout-btn"
+                                    onClick={handleLogoutClick}
+                                >
+                                    Log Out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        className="nav-link-btn"
+                        onClick={() => navigate('/login')}
+                    >
+                        Log In
+                    </button>
+                )}
             </div>
         </header>
     );
