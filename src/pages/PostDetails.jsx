@@ -11,6 +11,7 @@ import MetadataGrid from "../components/post-details/MetadataGrid";
 import SellerCard from "../components/post-details/SellerCard";
 import BookDescription from "../components/post-details/BookDescription";
 import ActionButtons from "../components/post-details/ActionButtons";
+import ReportListingModal from "../components/ReportListingModal";
 
 // Import mock data for fallback
 import { mockBooks } from "../data/mockBooks";
@@ -26,6 +27,7 @@ export default function PostDetails() {
     const [book, setBook] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
     const handleLogout = async () => {
         await logout();
@@ -237,10 +239,17 @@ export default function PostDetails() {
                     {/* Action buttons (Task 7) */}
                     <ActionButtons
                         onContactSeller={() => console.log("Contact seller:", book.sellerName)}
-                        onReport={() => console.log("Report listing id:", book.id)}
+                        onReport={() => setIsReportOpen(true)}
                     />
                 </div>
             </main>
+
+            {/* Report Listing Modal (Task 1) */}
+            <ReportListingModal
+                isOpen={isReportOpen}
+                onClose={() => setIsReportOpen(false)}
+                book={book}
+            />
         </div>
     );
 }
