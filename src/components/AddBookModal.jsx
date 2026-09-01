@@ -171,7 +171,6 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
     const isFormValid = useMemo(() => {
         if (form.images.length === 0) return false;
         if (!form.title.trim()) return false;
-        if (!form.description.trim()) return false;
         if (!form.condition) return false;
         if (!form.listingType) return false;
 
@@ -684,8 +683,8 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                             </label>
                             <input
                                 type="number"
-                                step="0.5"
-                                min="0.1"
+                                step="any"
+                                min="0"
                                 placeholder="10.00"
                                 value={form.price}
                                 onChange={(e) => handleChange("price", e.target.value)}
@@ -764,14 +763,13 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                     {/* 8. Description */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
-                            Description *
+                            Description <span style={{ fontWeight: "400", color: "#94a3b8" }}>(Optional)</span>
                         </label>
                         <textarea
                             rows={3}
-                            placeholder="Describe the condition, notes, or highlights inside the book..."
+                            placeholder="Describe condition, notes, or edition..."
                             value={form.description}
                             onChange={(e) => handleChange("description", e.target.value)}
-                            required
                             style={{
                                 padding: "10px 14px",
                                 borderRadius: "8px",
