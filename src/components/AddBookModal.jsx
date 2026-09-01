@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
     const { token } = useAuth();
+    const fileInputRef = useRef(null);
 
     const [form, setForm] = useState({
-        image: "",
+        images: [],
         listingType: "for_sale", // "for_sale" | "for_sale_and_exchange"
         title: "",
         author: "",
@@ -24,6 +25,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
     const [faculties, setFaculties] = useState([]);
     const [majors, setMajors] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [fieldErrors, setFieldErrors] = useState({});
     const [generalError, setGeneralError] = useState("");
 
@@ -102,7 +104,6 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
             return next;
         });
 
-        // Clear inline error on field change
         if (fieldErrors[field]) {
             setFieldErrors((prev) => {
                 const updated = { ...prev };
@@ -113,9 +114,62 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         setGeneralError("");
     };
 
+    // Handle multiple file uploads
+    const handleFileChange = async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        setUploadingImage(true);
+        setFieldErrors((prev) => {
+            const updated = { ...prev };
+            delete updated.images;
+            return updated;
+        });
+
+        try {
+            const uploadPromises = files.map(async (file) => {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                const res = await fetch("http://localhost:8080/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || `Failed to upload ${file.name}`);
+                }
+
+                const data = await res.json();
+                return data.url;
+            });
+
+            const newUrls = await Promise.all(uploadPromises);
+            handleChange("images", [...form.images, ...newUrls]);
+        } catch (err) {
+            setFieldErrors((prev) => ({
+                ...prev,
+                images: err.message || "Failed to upload one or more images.",
+            }));
+        } finally {
+            setUploadingImage(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    const handleRemoveImage = (indexToRemove) => {
+        handleChange(
+            "images",
+            form.images.filter((_, idx) => idx !== indexToRemove)
+        );
+    };
+
     // Real-time button validation
     const isFormValid = useMemo(() => {
-        if (!form.image.trim()) return false;
+        if (form.images.length === 0) return false;
         if (!form.title.trim()) return false;
         if (!form.description.trim()) return false;
         if (!form.condition) return false;
@@ -145,27 +199,34 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!isFormValid || loading) return;
+        if (!isFormValid || loading || uploadingImage) return;
+
+        if (!token) {
+            setGeneralError("You must be logged in to publish a book.");
+            return;
+        }
 
         setLoading(true);
         setFieldErrors({});
         setGeneralError("");
 
         const payload = {
-            image: form.image.trim(),
-            listing_type: form.listingType,
-            title: form.title.trim(),
-            author: form.author.trim() ? form.author.trim() : null,
-            category: form.category,
-            university_id: form.category === "academic" ? Number(form.universityId) : null,
-            faculty_id: form.category === "academic" ? Number(form.facultyId) : null,
-            major_id: form.category === "academic" ? Number(form.majorId) : null,
-            sub_type: form.category === "general" ? form.subType : null,
-            price: parseFloat(form.price),
-            exchange_for: form.listingType === "for_sale_and_exchange" ? form.exchangeFor.trim() : null,
-            condition: form.condition,
-            description: form.description.trim(),
-        };
+                coverImage: form.images[0] || "",
+                image: form.images[0] || "",
+                images_url: form.images,
+                listing_type: form.listingType,
+                title: form.title.trim(),
+                author: form.author.trim() ? form.author.trim() : null,
+                category: form.category,
+                university_id: form.category === "academic" ? Number(form.universityId) : null,
+                faculty_id: form.category === "academic" ? Number(form.facultyId) : null,
+                major_id: form.category === "academic" ? Number(form.majorId) : null,
+                sub_type: form.category === "general" ? form.subType : null,
+                price: parseFloat(form.price),
+                exchange_for: form.listingType === "for_sale_and_exchange" ? form.exchangeFor.trim() : null,
+                condition: form.condition,
+                description: form.description.trim(),
+            };
 
         try {
             const response = await fetch("http://localhost:8080/listings", {
@@ -176,6 +237,11 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                 },
                 body: JSON.stringify(payload),
             });
+
+            if (response.status === 403 || response.status === 401) {
+                setGeneralError("Your session has expired. Please log in again.");
+                return;
+            }
 
             const data = await response.json().catch(() => ({}));
 
@@ -274,27 +340,128 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                         </div>
                     )}
 
-                    {/* 1. Book Photo */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                        <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
-                            Book Photo URL *
-                        </label>
+                    {/* 1. Book Photos Uploader */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
+                                Book Photos * ({form.images.length})
+                            </label>
+                            {form.images.length > 0 && (
+                                <label
+                                    htmlFor="book-photos-input"
+                                    style={{
+                                        fontSize: "12px",
+                                        fontWeight: "600",
+                                        color: "#f97316",
+                                        cursor: uploadingImage ? "not-allowed" : "pointer",
+                                    }}
+                                >
+                                    + Add more photos
+                                </label>
+                            )}
+                        </div>
+
                         <input
-                            type="url"
-                            placeholder="https://images.unsplash.com/..."
-                            value={form.image}
-                            onChange={(e) => handleChange("image", e.target.value)}
-                            required
-                            style={{
-                                padding: "10px 14px",
-                                borderRadius: "8px",
-                                border: fieldErrors.image ? "1px solid #ef4444" : "1px solid #cbd5e1",
-                                fontSize: "14px",
-                                outline: "none",
-                            }}
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleFileChange}
+                            style={{ display: "none" }}
+                            id="book-photos-input"
                         />
-                        {fieldErrors.image && (
-                            <span style={{ color: "#ef4444", fontSize: "12px" }}>{fieldErrors.image}</span>
+
+                        {form.images.length === 0 ? (
+                            <label
+                                htmlFor="book-photos-input"
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: "24px 16px",
+                                    border: fieldErrors.images ? "2px dashed #ef4444" : "2px dashed #cbd5e1",
+                                    borderRadius: "10px",
+                                    backgroundColor: "#f8fafc",
+                                    cursor: uploadingImage ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                <span style={{ fontSize: "28px", marginBottom: "4px" }}>📸</span>
+                                <span style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
+                                    {uploadingImage ? "Uploading photos..." : "Click to select book photos"}
+                                </span>
+                                <span style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
+                                    Upload 1 or more photos (PNG, JPG, WEBP)
+                                </span>
+                            </label>
+                        ) : (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                                {form.images.map((url, idx) => (
+                                    <div
+                                        key={url + idx}
+                                        style={{
+                                            position: "relative",
+                                            aspectRatio: "3/4",
+                                            borderRadius: "8px",
+                                            overflow: "hidden",
+                                            border: idx === 0 ? "2px solid #f97316" : "1px solid #cbd5e1",
+                                        }}
+                                    >
+                                        <img
+                                            src={url}
+                                            alt={`Book ${idx + 1}`}
+                                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                        />
+                                        {idx === 0 && (
+                                            <span
+                                                style={{
+                                                    position: "absolute",
+                                                    bottom: "4px",
+                                                    left: "4px",
+                                                    backgroundColor: "rgba(249, 115, 22, 0.9)",
+                                                    color: "#fff",
+                                                    fontSize: "10px",
+                                                    fontWeight: "700",
+                                                    padding: "2px 5px",
+                                                    borderRadius: "4px",
+                                                }}
+                                            >
+                                                Cover
+                                            </span>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveImage(idx)}
+                                            style={{
+                                                position: "absolute",
+                                                top: "4px",
+                                                right: "4px",
+                                                backgroundColor: "rgba(15, 23, 42, 0.75)",
+                                                color: "#fff",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                width: "20px",
+                                                height: "20px",
+                                                fontSize: "11px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {uploadingImage && form.images.length > 0 && (
+                            <span style={{ fontSize: "12px", color: "#f97316" }}>Uploading additional photos...</span>
+                        )}
+
+                        {fieldErrors.images && (
+                            <span style={{ color: "#ef4444", fontSize: "12px" }}>{fieldErrors.images}</span>
                         )}
                     </div>
 
@@ -645,15 +812,15 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                         </button>
                         <button
                             type="submit"
-                            disabled={!isFormValid || loading}
+                            disabled={!isFormValid || loading || uploadingImage}
                             style={{
                                 padding: "10px 22px",
                                 borderRadius: "8px",
                                 border: "none",
-                                backgroundColor: isFormValid && !loading ? "#f97316" : "#cbd5e1",
+                                backgroundColor: isFormValid && !loading && !uploadingImage ? "#f97316" : "#cbd5e1",
                                 color: "#ffffff",
                                 fontWeight: "600",
-                                cursor: isFormValid && !loading ? "pointer" : "not-allowed",
+                                cursor: isFormValid && !loading && !uploadingImage ? "pointer" : "not-allowed",
                                 transition: "all 0.2s ease",
                             }}
                         >

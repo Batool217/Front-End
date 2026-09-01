@@ -1,8 +1,8 @@
 import "../styles/css/card.css";
 
-function BookCard({ id, title, coverImage, price, type, category, onClick }) {
+function BookCard({ id, title, coverImage, cover_image, image, imagesUrl, images_url, price, type, category, onClick }) {
     const defaultCover = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80";
-    const displayImage = coverImage || defaultCover;
+    const displayImage = coverImage || cover_image || image || imagesUrl?.[0] || images_url?.[0] || defaultCover;
     const tag = type || (category === "academic" ? "Academic" : null);
 
     return (

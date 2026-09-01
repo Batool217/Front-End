@@ -99,12 +99,14 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
                     {books.map((book) => (
                         <BookCard
                             key={book.id || book.bookId}
-                            id={book.id || book.bookId}
-                            title={book.title}
-                            price={book.price}
-                            coverImage={book.coverImage || (book.imagesUrl && book.imagesUrl[0])}
-                            type={book.type}
-                            category={book.category}
+                            {...book}
+                            coverImage={
+                                book.coverImage ||
+                                book.cover_image ||
+                                book.image ||
+                                (book.imagesUrl && book.imagesUrl[0]) ||
+                                (book.images_url && book.images_url[0])
+                            }
                             onClick={(id) => console.log("Clicked book id:", id)}
                         />
                     ))}
