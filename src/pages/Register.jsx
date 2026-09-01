@@ -44,7 +44,7 @@ function Register() {
       newErrors.fullName = "Full name must be between 3 and 50 characters";
     }
 
-    const cleanedPhone = form.phoneNumber.replace(/[\s\-\(\)]/g, "");
+    const cleanedPhone = form.phoneNumber.replace(/[\s\-()]/g, "");
     if (!cleanedPhone) {
       newErrors.phoneNumber = "Phone number is required";
     } else if (!/^(\+?\d{1,4})?\d{10,14}$/.test(cleanedPhone)) {
@@ -69,7 +69,7 @@ function Register() {
       newErrors.password = "Password must include at least one lowercase letter (a-z)";
     } else if (!/[0-9]/.test(form.password)) {
       newErrors.password = "Password must include at least one number (0-9)";
-    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password)) {
+    } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password)) {
       newErrors.password = "Password must include at least one special character (!@#$%^&*)";
     }
 
@@ -132,7 +132,7 @@ function Register() {
       }
 
       navigate("/login");
-    } catch (error) {
+    } catch  {
       const msg = "Unable to connect to the server";
       setErrors({
         general: msg,
@@ -152,7 +152,7 @@ function Register() {
           <h1>Create your account</h1>
 
           <p className="subtitle">
-            Join thousands of students buying and selling books
+            Join thousands of people buying and selling books
           </p>
 
           <div className="auth-tabs">
@@ -184,7 +184,7 @@ function Register() {
                 <input
                   type="text"
                   name="fullName"
-                  placeholder="Abdel rahman"
+                  placeholder="Enter your full name"
                   value={form.fullName}
                   onChange={handleChange}
                 />
@@ -257,11 +257,7 @@ function Register() {
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>
-
-            <p className="auth-terms">
-              By signing up you agree to our <a href="#">Terms</a> &amp;{" "}
-              <a href="#">Privacy Policy</a>
-            </p>
+            
           </form>
         </div>
       </div>

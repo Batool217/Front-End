@@ -8,51 +8,50 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        let isMounted = true;
-
+        const controller = new AbortController();
         const params = new URLSearchParams();
 
         if (searchQuery && searchQuery.trim()) {
             params.append("search", searchQuery.trim());
         }
 
-        const hasAcademicSelection =
-            Boolean(filters.academic?.universityId) ||
-            Boolean(filters.academic?.facultyId) ||
-            Boolean(filters.academic?.majorId);
-
-        if (filters.activeTab === "Academic" && hasAcademicSelection) {
+        if (filters.activeTab === "Academic") {
             params.append("category", "academic");
-            if (filters.academic.universityId) {
+            if (filters.academic?.universityId) {
                 params.append("university_id", filters.academic.universityId);
             }
-            if (filters.academic.facultyId) {
+            if (filters.academic?.facultyId) {
                 params.append("faculty_id", filters.academic.facultyId);
             }
-            if (filters.academic.majorId) {
+            if (filters.academic?.majorId) {
                 params.append("major_id", filters.academic.majorId);
             }
-        } else if (filters.activeTab === "General" && filters.general?.type) {
+        } else if (filters.activeTab === "General") {
+            // 1. Always restrict to category = general when on General tab
             params.append("category", "general");
-            params.append("type", filters.general.type);
+
+            // 2. If 'book' or 'novel' is explicitly selected, filter by sub_type
+            if (filters.general?.type) {
+                params.append("sub_type", filters.general.type);
+            }
         }
 
         params.append("limit", "8");
 
-        fetch(`http://localhost:8080/api/books?${params.toString()}`)
+        fetch(`http://localhost:8080/api/books?${params.toString()}`, {
+            signal: controller.signal,
+        })
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to load books feed.");
                 return res.json();
             })
             .then((data) => {
-                if (isMounted) {
-                    setBooks(Array.isArray(data) ? data : []);
-                    setError(null);
-                    setLoading(false);
-                }
+                setBooks(Array.isArray(data) ? data : []);
+                setError(null);
+                setLoading(false);
             })
             .catch((err) => {
-                if (isMounted) {
+                if (err.name !== "AbortError") {
                     console.error("Error fetching books:", err);
                     setError("Unable to load books. Please try again later.");
                     setLoading(false);
@@ -60,7 +59,7 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
             });
 
         return () => {
-            isMounted = false;
+            controller.abort();
         };
     }, [searchQuery, filters, refreshTrigger]);
 

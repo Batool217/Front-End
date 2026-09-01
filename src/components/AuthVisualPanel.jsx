@@ -1,3 +1,5 @@
+import logoImg from "../assets/logo.png";
+
 function AuthVisualPanel() {
     return (
         <div className="auth-visual">
@@ -5,7 +7,7 @@ function AuthVisualPanel() {
             <div className="auth-visual-circle-bottom" />
 
             <div className="auth-info-card">
-                <div className="auth-logo-badge">📚</div>
+                <img src={logoImg} alt="Waraq Logo" className="auth-logo-img" />
                 <h2 className="auth-brand-name">Waraq  ورق</h2>
                 <p className="auth-brand-tagline">Your book marketplace</p>
 

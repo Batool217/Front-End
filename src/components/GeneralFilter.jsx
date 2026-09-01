@@ -1,20 +1,16 @@
 import { useState } from "react";
 import "../styles/css/filter.css";
 
-const GENERAL_CATEGORIES = [
-    "Novels & Fiction",
-    "Summaries & Notes",
-    "Calculators & Tools",
-    "Stationery",
-    "Self-Help",
-    "Other",
+const GENERAL_SUBTYPES = [
+    { label: "Book", value: "book" },
+    { label: "Novel", value: "novel" },
 ];
 
 export default function GeneralFilter({ onFilterChange, onClear }) {
     const [selectedType, setSelectedType] = useState("");
 
-    const handleSelect = (category) => {
-        const nextValue = selectedType === category ? "" : category;
+    const handleSelect = (val) => {
+        const nextValue = selectedType === val ? "" : val;
         setSelectedType(nextValue);
         if (onFilterChange) {
             onFilterChange({ type: nextValue });
@@ -34,16 +30,16 @@ export default function GeneralFilter({ onFilterChange, onClear }) {
     return (
         <div className="general-filter-body">
             <div className="filter-field">
-                <label className="filter-field-label">Category / Item Type</label>
-                <div className="filter-chip-grid">
-                    {GENERAL_CATEGORIES.map((category) => (
+                <label className="filter-field-label">Sub-Type</label>
+                <div className="filter-chip-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    {GENERAL_SUBTYPES.map((sub) => (
                         <button
-                            key={category}
+                            key={sub.value}
                             type="button"
-                            className={`filter-chip-btn ${selectedType === category ? "active" : ""}`}
-                            onClick={() => handleSelect(category)}
+                            className={`filter-chip-btn ${selectedType === sub.value ? "active" : ""}`}
+                            onClick={() => handleSelect(sub.value)}
                         >
-                            {category}
+                            {sub.label}
                         </button>
                     ))}
                 </div>

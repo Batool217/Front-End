@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FilterModal from './FilterModal';
 import '../styles/css/navbar.css';
+import logoImg from "../assets/logo.png";
 
 const Navbar = ({ onSearch, onFilterChange }) => {
     const navigate = useNavigate();
@@ -49,9 +50,10 @@ const Navbar = ({ onSearch, onFilterChange }) => {
 
     return (
         <header className="navbar">
-            {/* 1. Logo Section */}
-            <div className="nav-left" onClick={() => navigate('/home')}>
-                <span className="logo-badge">📙</span>
+            <div className="nav-left" onClick={() => navigate("/home")}>
+                <div className="logo-badge">
+                    <img src={logoImg} alt="Waraq Logo" className="logo-img" />
+                </div>
                 <span className="logo-text">Waraq</span>
             </div>
 
