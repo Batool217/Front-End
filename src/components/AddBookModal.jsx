@@ -1,26 +1,27 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 
+const INITIAL_FORM = {
+    images: [],
+    listingType: "for_sale", // "for_sale" | "for_sale_and_exchange"
+    title: "",
+    author: "",
+    category: "academic", // "academic" | "general"
+    universityId: "",
+    facultyId: "",
+    majorId: "",
+    subType: "book", // "book" | "novel"
+    price: "",
+    exchangeFor: "",
+    condition: "good", // "new" | "good" | "fair"
+    description: "",
+};
+
 export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
     const { token } = useAuth();
     const fileInputRef = useRef(null);
 
-    const [form, setForm] = useState({
-        images: [],
-        listingType: "for_sale", // "for_sale" | "for_sale_and_exchange"
-        title: "",
-        author: "",
-        category: "academic", // "academic" | "general"
-        universityId: "",
-        facultyId: "",
-        majorId: "",
-        subType: "book", // "book" | "novel"
-        price: "",
-        exchangeFor: "",
-        condition: "good", // "new" | "good" | "fair"
-        description: "",
-    });
-
+    const [form, setForm] = useState(INITIAL_FORM);
     const [universities, setUniversities] = useState([]);
     const [faculties, setFaculties] = useState([]);
     const [majors, setMajors] = useState([]);
@@ -28,6 +29,29 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
     const [uploadingImage, setUploadingImage] = useState(false);
     const [fieldErrors, setFieldErrors] = useState({});
     const [generalError, setGeneralError] = useState("");
+
+    const resetForm = () => {
+        setForm(INITIAL_FORM);
+        setFieldErrors({});
+        setGeneralError("");
+        setFaculties([]);
+        setMajors([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const handleCloseModal = () => {
+        resetForm();
+        onClose();
+    };
+
+    // Reset whenever modal opens or closes
+    useEffect(() => {
+        if (!isOpen) {
+            resetForm();
+        }
+    }, [isOpen]);
 
     // 1. Fetch universities on modal open
     useEffect(() => {
@@ -174,8 +198,16 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         if (!form.condition) return false;
         if (!form.listingType) return false;
 
-        const numPrice = parseFloat(form.price);
-        if (isNaN(numPrice) || numPrice <= 0) return false;
+        // Price validation conditional on listing type
+        if (form.listingType === "for_sale") {
+            const numPrice = parseFloat(form.price);
+            if (isNaN(numPrice) || numPrice <= 0) return false;
+        } else if (form.listingType === "for_sale_and_exchange") {
+            if (form.price !== "" && form.price !== null) {
+                const numPrice = parseFloat(form.price);
+                if (isNaN(numPrice) || numPrice < 0) return false;
+            }
+        }
 
         if (form.listingType === "for_sale_and_exchange" && !form.exchangeFor.trim()) {
             return false;
@@ -209,23 +241,28 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         setFieldErrors({});
         setGeneralError("");
 
+        const parsedPrice =
+            form.price !== "" && !isNaN(parseFloat(form.price))
+                ? parseFloat(form.price)
+                : null;
+
         const payload = {
-                coverImage: form.images[0] || "",
-                image: form.images[0] || "",
-                images_url: form.images,
-                listing_type: form.listingType,
-                title: form.title.trim(),
-                author: form.author.trim() ? form.author.trim() : null,
-                category: form.category,
-                university_id: form.category === "academic" ? Number(form.universityId) : null,
-                faculty_id: form.category === "academic" ? Number(form.facultyId) : null,
-                major_id: form.category === "academic" ? Number(form.majorId) : null,
-                sub_type: form.category === "general" ? form.subType : null,
-                price: parseFloat(form.price),
-                exchange_for: form.listingType === "for_sale_and_exchange" ? form.exchangeFor.trim() : null,
-                condition: form.condition,
-                description: form.description.trim(),
-            };
+            coverImage: form.images[0] || "",
+            image: form.images[0] || "",
+            images_url: form.images,
+            listing_type: form.listingType,
+            title: form.title.trim(),
+            author: form.author.trim() ? form.author.trim() : null,
+            category: form.category,
+            university_id: form.category === "academic" ? Number(form.universityId) : null,
+            faculty_id: form.category === "academic" ? Number(form.facultyId) : null,
+            major_id: form.category === "academic" ? Number(form.majorId) : null,
+            sub_type: form.category === "general" ? form.subType : null,
+            price: parsedPrice,
+            exchange_for: form.listingType === "for_sale_and_exchange" ? form.exchangeFor.trim() : null,
+            condition: form.condition,
+            description: form.description.trim(),
+        };
 
         try {
             const response = await fetch("http://localhost:8080/listings", {
@@ -253,6 +290,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                 return;
             }
 
+            resetForm();
             if (onBookAdded) onBookAdded();
             onClose();
         } catch (err) {
@@ -266,7 +304,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
             {/* Backdrop */}
             <div
-                onClick={onClose}
+                onClick={handleCloseModal}
                 style={{
                     position: "fixed",
                     inset: 0,
@@ -308,7 +346,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                     </h2>
                     <button
                         type="button"
-                        onClick={onClose}
+                        onClick={handleCloseModal}
                         style={{
                             background: "transparent",
                             border: "none",
@@ -679,16 +717,16 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                             <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
-                                Price (JOD) *
+                                Price (JOD) {form.listingType === "for_sale" ? "*" : <span style={{ fontWeight: "400", color: "#94a3b8" }}>(Optional)</span>}
                             </label>
                             <input
                                 type="number"
                                 step="any"
                                 min="0"
-                                placeholder="10.00"
+                                placeholder={form.listingType === "for_sale" ? "10.00" : "Optional (e.g. 10.00)"}
                                 value={form.price}
                                 onChange={(e) => handleChange("price", e.target.value)}
-                                required
+                                required={form.listingType === "for_sale"}
                                 style={{
                                     padding: "10px 14px",
                                     borderRadius: "8px",
@@ -795,7 +833,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                     >
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={handleCloseModal}
                             style={{
                                 padding: "10px 18px",
                                 borderRadius: "8px",
