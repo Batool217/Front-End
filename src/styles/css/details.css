@@ -1,0 +1,452 @@
+/* Modern styling for the Post Details page */
+
+.details-page-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 24px 48px 64px 48px;
+    box-sizing: border-box;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
+}
+
+/* Breadcrumb Styling */
+.breadcrumb-container {
+    font-size: 14px;
+    color: #64748b;
+    margin: 12px 0 24px 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.breadcrumb-link {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+
+.breadcrumb-link:hover {
+    color: #f97316;
+}
+
+.breadcrumb-separator {
+    color: #cbd5e1;
+}
+
+.breadcrumb-current {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Main Grid Layout */
+.details-main-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr;
+    gap: 48px;
+    margin-top: 24px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* Left Column: Image Gallery */
+.image-gallery-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-image-wrapper {
+    width: 100%;
+    aspect-ratio: 4 / 3.2;
+    background-color: #f1f5f9;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-display-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.main-display-image:hover {
+    transform: scale(1.02);
+}
+
+.thumbnail-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.thumbnail-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.thumbnail-wrapper:hover {
+    border-color: #cbd5e1;
+}
+
+.thumbnail-wrapper.active {
+    border-color: #f97316;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.15);
+}
+
+.thumbnail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Right Column: Book Content */
+.book-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.book-header-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Badges / Pills */
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge-pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge-pill.condition-new {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-pill.condition-excellent {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-pill.condition-good {
+    background-color: #fef9c3;
+    color: #854d0e;
+}
+
+.badge-pill.condition-fair {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-pill.category-badge {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.badge-pill.university-badge {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.details-book-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 4px 0 0 0;
+    line-height: 1.2;
+}
+
+.details-book-author {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+.details-price-tag {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e3a8a; /* Bold Dark Blue as in screenshots */
+    margin: 8px 0 0 0;
+}
+
+.condition-excellence-banner {
+    margin-top: 10px;
+    background-color: #f8fafc;
+    border-left: 4px solid #166534;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #166534;
+}
+
+/* Metadata Grid */
+.metadata-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 20px 0;
+}
+
+.metadata-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metadata-icon {
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f8fafc;
+    border-radius: 50%;
+    color: #475569;
+}
+
+.metadata-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.metadata-value {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 700;
+}
+
+/* Seller Card */
+.seller-card-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.seller-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.seller-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #e2e8f0;
+}
+
+.seller-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.seller-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.seller-subinfo {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.view-profile-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-profile-btn:hover {
+    background-color: #f9fafb;
+    border-color: #cbd5e1;
+}
+
+/* Book Description & Exchange Offer */
+.book-description-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.description-paragraph {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #475569;
+    margin: 0;
+}
+
+/* Exchange Alert Box */
+.exchange-box {
+    margin-top: 14px;
+    background-color: #fffaf0; /* Warm Light Orange/Amber Background */
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.exchange-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exchange-icon {
+    font-size: 16px;
+}
+
+.exchange-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #ea580c;
+    letter-spacing: 1px;
+}
+
+.exchange-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    margin: 0;
+}
+
+/* Action Footer */
+.action-buttons-container {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.report-listing-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+    color: #dc2626;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.report-listing-btn:hover {
+    background-color: #f1f5f9;
+}
+
+.contact-seller-btn {
+    flex: 2.2;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: none;
+    background-color: #f97316; /* Brand Orange */
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.contact-seller-btn:hover {
+    background-color: #ea580c;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+}
+
+/* Responsive Rules */
+@media (max-width: 1024px) {
+    .details-main-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 30px;
+    }
+    .details-page-wrapper {
+        padding: 20px 24px 48px 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .metadata-grid-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .action-buttons-container {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+    .report-listing-btn, .contact-seller-btn {
+        width: 100%;
+    }
+}
