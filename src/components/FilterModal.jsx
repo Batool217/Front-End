@@ -47,7 +47,7 @@ export default function FilterModal({ isOpen, onClose, onFilterChange }) {
             <div className="filter-modal-container">
                 {/* Tab Switcher */}
                 <div className="filter-tabs">
-                    {["Academic", "General", "All"].map((tab) => (
+                    {["Academic", "General"].map((tab) => (
                         <button
                             key={tab}
                             type="button"
@@ -73,20 +73,6 @@ export default function FilterModal({ isOpen, onClose, onFilterChange }) {
                             onFilterChange={handleGeneralChange}
                             onClear={handleClearAll}
                         />
-                    )}
-
-                    {activeTab === "All" && (
-                        <div className="all-filters-wrapper">
-                            <AcademicFilter
-                                onFilterChange={handleAcademicChange}
-                                onClear={handleClearAll}
-                            />
-                            <div className="filter-divider" />
-                            <GeneralFilter
-                                onFilterChange={handleGeneralChange}
-                                onClear={handleClearAll}
-                            />
-                        </div>
                     )}
                 </div>
 

@@ -11,7 +11,6 @@ function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -158,21 +157,6 @@ function Login() {
                 )}
               </div>
 
-              <div className="login-options">
-                <label className="remember-me">
-                  <input
-                      type="checkbox"
-                      name="rememberMe"
-                      checked={form.rememberMe}
-                      onChange={handleChange}
-                  />
-                  <span>Remember me</span>
-                </label>
-
-                <a className="forgot-link" href="#">
-                  Forgot password?
-                </a>
-              </div>
 
               <button
                   className="primary-button"
