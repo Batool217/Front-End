@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         const currentToken = localStorage.getItem("token") || sessionStorage.getItem("token");
         if (currentToken) {
             try {
-                await fetch("http://localhost:8080/api/auth/logout", {
+                await fetch("http://localhost:8080/api/v1/auth/logout", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${currentToken}`,
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
 
         let isMounted = true;
 
-        fetch("http://localhost:8080/api/users/profile", {
+        fetch("http://localhost:8080/api/v1/users/profile", {
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",

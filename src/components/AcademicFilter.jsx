@@ -14,7 +14,7 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
     useEffect(() => {
         let isMounted = true;
 
-        fetch("http://localhost:8080/api/universities")
+        fetch("http://localhost:8080/api/v1/universities")
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) {
@@ -36,7 +36,7 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
 
         let isMounted = true;
 
-        fetch(`http://localhost:8080/api/faculties?university_id=${selectedUniversity}`)
+        fetch(`http://localhost:8080/api/v1/faculties?university_id=${selectedUniversity}`)
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) {
@@ -58,7 +58,7 @@ export default function AcademicFilter({ onFilterChange, onClear }) {
 
         let isMounted = true;
 
-        fetch(`http://localhost:8080/api/majors?faculty_id=${selectedFaculty}`)
+        fetch(`http://localhost:8080/api/v1/majors?faculty_id=${selectedFaculty}`)
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) {

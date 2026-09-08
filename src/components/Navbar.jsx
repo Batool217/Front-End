@@ -46,7 +46,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
     };
 
     const displayName = user?.name || "User";
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff`;
+    const avatarUrl = `https://ui-avatars.com/api/v1/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff`;
 
     return (
         <header className="navbar">

@@ -29,18 +29,18 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
                 params.append("major_id", filters.academic.majorId);
             }
         } else if (filters.activeTab === "General") {
-            // 1. Always restrict to category = general when on General tab
             params.append("category", "general");
 
-            // 2. If 'book' or 'novel' is explicitly selected, filter by sub_type
             if (filters.general?.type) {
                 params.append("sub_type", filters.general.type);
             }
         }
 
-        params.append("limit", "8");
+        params.append("limit", "20");
 
-        fetch(`http://localhost:8080/api/books?${params.toString()}`, {
+        setLoading(true);
+
+        fetch(`http://localhost:8080/api/v1/listings?${params.toString()}`, {
             signal: controller.signal,
         })
             .then((res) => {
@@ -98,20 +98,23 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
 
             {!loading && !error && books.length > 0 && (
                 <div className="listings-grid">
-                    {books.map((book) => (
-                        <BookCard
-                            key={book.id || book.bookId}
-                            {...book}
-                            coverImage={
-                                book.coverImage ||
-                                book.cover_image ||
-                                book.image ||
-                                (book.imagesUrl && book.imagesUrl[0]) ||
-                                (book.images_url && book.images_url[0])
-                            }
-                            onClick={(id) => console.log("Clicked book id:", id)}
-                        />
-                    ))}
+                    {books.map((book) => {
+                        const bookId = book.id || book.bookId;
+                        return (
+                            <BookCard
+                                key={bookId}
+                                {...book}
+                                coverImage={
+                                    book.coverImage ||
+                                    book.cover_image ||
+                                    book.image ||
+                                    (book.imagesUrl && book.imagesUrl[0]) ||
+                                    (book.images_url && book.images_url[0])
+                                }
+                                onClick={() => navigate(`/books/${bookId}`)}
+                            />
+                        );
+                    })}
                 </div>
             )}
         </section>

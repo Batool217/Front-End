@@ -58,7 +58,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         if (!isOpen) return;
 
         let isMounted = true;
-        fetch("http://localhost:8080/api/universities")
+        fetch("http://localhost:8080/api/v1/universities")
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) setUniversities(Array.isArray(data) ? data : []);
@@ -75,7 +75,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         if (!form.universityId) return;
 
         let isMounted = true;
-        fetch(`http://localhost:8080/api/faculties?university_id=${form.universityId}`)
+        fetch(`http://localhost:8080/api/v1/faculties?university_id=${form.universityId}`)
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) setFaculties(Array.isArray(data) ? data : []);
@@ -92,7 +92,7 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         if (!form.facultyId) return;
 
         let isMounted = true;
-        fetch(`http://localhost:8080/api/majors?faculty_id=${form.facultyId}`)
+        fetch(`http://localhost:8080/api/v1/majors?faculty_id=${form.facultyId}`)
             .then((res) => (res.ok ? res.json() : []))
             .then((data) => {
                 if (isMounted) setMajors(Array.isArray(data) ? data : []);
@@ -155,18 +155,18 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const res = await fetch("http://localhost:8080/api/upload", {
+                const res = await fetch("http://localhost:8080/api/v1/upload", {
                     method: "POST",
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
                     body: formData,
                 });
 
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    const data = await res.json().catch(() => ({}));
-                    throw new Error(data.error || `Failed to upload ${file.name}`);
+                    throw new Error(data.error || data.message || `Failed to upload ${file.name}`);
                 }
 
-                const data = await res.json();
-                return data.url;
+                return data.url || data.imageUrl || data;
             });
 
             const newUrls = await Promise.all(uploadPromises);
@@ -265,11 +265,11 @@ export default function AddBookModal({ isOpen, onClose, onBookAdded }) {
         };
 
         try {
-            const response = await fetch("http://localhost:8080/listings", {
+            const response = await fetch("http://localhost:8080/api/v1/listings", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(payload),
             });

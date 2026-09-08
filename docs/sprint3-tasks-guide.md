@@ -16,7 +16,7 @@ This document outlines the division of tasks and the Git branching workflow for 
     *   Integrate and coordinate child components from Tasks 2-7.
 
 ### Task 2: Interactive Image Gallery (Left Column)
-*   **Target Component:** `src/components/post-details/ImageGallery.jsx`
+*   **Target Component:** `../src/post-details/ImageGallery.jsx`
 *   **Responsibilities:**
     *   Build the main image display container.
     *   Create a thumbnail row below the main image for listings with multiple photos.
@@ -24,7 +24,7 @@ This document outlines the division of tasks and the Git branching workflow for 
     *   Handle loading states and image fallback wrappers.
 
 ### Task 3: Header Details, Badges & Price
-*   **Target Component:** `src/components/post-details/BookHeader.jsx`
+*   **Target Component:** `../src/post-details/BookHeader.jsx`
 *   **Responsibilities:**
     *   Design the pills/badges row (e.g., `Good`, `Academic`, `University of Jordan`).
     *   Render the main book title and author.
@@ -32,7 +32,7 @@ This document outlines the division of tasks and the Git branching workflow for 
     *   Implement conditional styling for high-quality items (e.g., displaying "Excellent - like new or similar" banner when condition is Excellent).
 
 ### Task 4: Metadata Grid Component
-*   **Target Component:** `src/components/post-details/MetadataGrid.jsx`
+*   **Target Component:** `../src/post-details/MetadataGrid.jsx`
 *   **Responsibilities:**
     *   Build a 3-column layout displaying key details:
         *   **Faculty:** with university icon 🏛️ (only for Academic category).
@@ -41,7 +41,7 @@ This document outlines the division of tasks and the Git branching workflow for 
     *   Ensure the component dynamically hides the Faculty field if the category is `General`.
 
 ### Task 5: Seller Profile Card
-*   **Target Component:** `src/components/post-details/SellerCard.jsx`
+*   **Target Component:** `../src/post-details/SellerCard.jsx`
 *   **Responsibilities:**
     *   Create the card component displaying:
         *   Seller avatar.
@@ -50,7 +50,7 @@ This document outlines the division of tasks and the Git branching workflow for 
     *   Create a stylized "View Profile" button that redirects to the seller's profile.
 
 ### Task 6: Description & Exchange Details Box
-*   **Target Component:** `src/components/post-details/BookDescription.jsx`
+*   **Target Component:** `../src/post-details/BookDescription.jsx`
 *   **Responsibilities:**
     *   Design the `About this book` typography and paragraph area.
     *   Create the conditional `Exchange For` card:
@@ -58,7 +58,7 @@ This document outlines the division of tasks and the Git branching workflow for 
         *   Only renders if the listing type is `for_sale_and_exchange`.
 
 ### Task 7: Action Footer (Contact & Report)
-*   **Target Component:** `src/components/post-details/ActionButtons.jsx`
+*   **Target Component:** `../src/post-details/ActionButtons.jsx`
 *   **Responsibilities:**
     *   Implement the two primary action buttons at the bottom of the details card:
         *   `Report` button (subtle gray style, warning/flag icon).
