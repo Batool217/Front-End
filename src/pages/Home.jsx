@@ -68,6 +68,7 @@ export default function Home() {
                 }}
             >
                 <HeroBanner onAddBook={handleAddBookClick} />
+
                 <RecentListings
                     searchQuery={searchQuery}
                     filters={filters}

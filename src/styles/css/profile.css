@@ -1,0 +1,236 @@
+.profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: flex-start;
+}
+
+.profile-sidebar {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(18, 52, 91, 0.05);
+}
+
+.profile-avatar-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.profile-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f97316;
+}
+
+.profile-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.profile-sidebar h2 {
+    color: #12345b;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.profile-phone,
+.profile-member-since {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.profile-nav {
+    margin-top: 22px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-nav button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #12345b;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profile-nav button:hover {
+    background: #f8faff;
+}
+
+.profile-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-nav-icon {
+    color: #64748b;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.profile-nav button:hover .profile-nav-icon {
+    color: #12345b;
+}
+
+.profile-nav-chevron {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.profile-nav button.logout {
+    color: #ef4444;
+    margin-top: 6px;
+}
+
+.profile-nav button.logout .profile-nav-icon {
+    color: #ef4444;
+}
+
+.profile-nav button.logout:hover {
+    background: #fee2e2;
+}
+
+.profile-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.profile-main-header h2 {
+    color: #12345b;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.view-all-link {
+    color: #f97316;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.profile-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.mini-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mini-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(18, 52, 91, 0.1);
+}
+
+.mini-card-image-wrap {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #f1f5f9;
+}
+
+.mini-card-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mini-badge.swap {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #f97316;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.mini-card-body {
+    padding: 12px 14px;
+}
+
+.mini-card-body h4 {
+    color: #12345b;
+    font-size: 14.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.mini-card-body p {
+    color: #64748b;
+    font-size: 12.5px;
+}
+
+.mini-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.mini-price {
+    font-weight: 800;
+    color: #12345b;
+    font-size: 15px;
+}
+
+.mini-price.exchange {
+    color: #f97316;
+}
+
+.mini-condition {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+}
+
+.mini-university {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 11.5px;
+}
+
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+}

@@ -122,21 +122,59 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                         </div>
 
                         {isProfileOpen && (
-                            <div className="profile-dropdown">
-                                <div className="profile-dropdown-header">
-                                    <strong>{displayName}</strong>
-                                    {user?.email && (
-                                        <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>
-                                            {user.email}
-                                        </span>
-                                    )}
+                            <div className="user-dropdown">
+                                <div className="user-info">
+                                    <strong>{user?.name}</strong>
+                                    <span>{user?.email}</span>
                                 </div>
+
+                                <div className="dropdown-divider"></div>
+
                                 <button
                                     type="button"
-                                    className="dropdown-logout-btn"
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setIsProfileOpen(false);
+                                        navigate("/profile");
+                                    }}
+                                >
+                                    <span>👤</span>
+                                    <span>My Profile</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setIsProfileOpen(false);
+                                        navigate("/mylistings");
+                                    }}
+                                >
+                                    <span>📚</span>
+                                    <span>My Listings</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setIsProfileOpen(false);
+                                        navigate("/editprofile");
+                                    }}
+                                >
+                                    <span>✏️</span>
+                                    <span>Edit Profile</span>
+                                </button>
+
+                                <div className="dropdown-divider"></div>
+
+                                <button
+                                    type="button"
+                                    className="dropdown-item logout-item"
                                     onClick={handleLogoutClick}
                                 >
-                                    Log Out
+                                    <span>↪</span>
+                                    <span>Log Out</span>
                                 </button>
                             </div>
                         )}
