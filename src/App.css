@@ -1,1 +1,74 @@
-/* Application-wide custom utility styles (if needed) */
+/* Quick Navigation */
+.quick-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    width: 100%;
+}
+
+.quick-nav-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(18, 52, 91, 0.08);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.quick-nav-card:hover {
+    transform: translateY(-3px);
+    border-color: #f97316;
+    box-shadow: 0 10px 24px rgba(18, 52, 91, 0.12);
+}
+
+.quick-nav-icon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: #fff7ed;
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+.quick-nav-card div {
+    flex: 1;
+}
+
+.quick-nav-card h3 {
+    margin: 0 0 4px;
+    color: #182e4b;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.quick-nav-card p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.quick-nav-arrow {
+    color: #f97316;
+    font-size: 20px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+}
+
+.quick-nav-card:hover .quick-nav-arrow {
+    transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+    .quick-nav {
+        grid-template-columns: 1fr;
+    }
+}

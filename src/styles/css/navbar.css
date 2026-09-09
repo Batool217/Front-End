@@ -142,7 +142,8 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
-/* Avatar & Dropdown */
+/* --- Avatar & Dropdown --- */
+
 .avatar-wrapper {
     position: relative;
 }
@@ -166,6 +167,99 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* User Dropdown */
+
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* User information at the top */
+
+.user-info {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.user-info strong {
+    color: #182e4b;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.user-info span {
+    color: #64748b;
+    font-size: 12px;
+    word-break: break-word;
+}
+
+/* Divider */
+
+.dropdown-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 0;
+}
+
+/* Dropdown buttons */
+
+.dropdown-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 11px 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    text-align: left;
+    cursor: pointer;
+
+    color: #182e4b;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8fafc;
+}
+
+/* Icons */
+
+.dropdown-item span:first-child {
+    width: 22px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Logout */
+
+.logout-item {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.logout-item:hover {
+    background-color: #fef2f2;
+}
+
+
+/* --- Old dropdown styles kept compatible --- */
 
 .profile-dropdown {
     position: absolute;
