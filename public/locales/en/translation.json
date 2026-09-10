@@ -29,5 +29,26 @@
     "loading": "Loading...",
     "active": "Active",
     "sold": "Sold"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your Waraq account",
+    "signUp": "Sign Up",
+    "logIn": "Log In",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "ahmad@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Your password",
+    "loggingIn": "Logging in...",
+    "createAccount": "Create an account",
+    "registerSubtitle": "Join Waraq and start buying and selling books",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Ahmad Mohammad",
+    "university": "University",
+    "selectUniversity": "Select your university",
+    "phoneNumber": "Phone Number",
+    "phonePlaceholder": "079 123 4567",
+    "confirmPassword": "Confirm Password",
+    "creatingAccount": "Creating account..."
   }
 }

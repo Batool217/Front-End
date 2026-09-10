@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 import AuthVisualPanel from "../components/AuthVisualPanel";
 import PaperBackground from "../components/PaperBackground";
@@ -7,6 +8,7 @@ import PaperBackground from "../components/PaperBackground";
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     email: "",
@@ -112,17 +114,17 @@ function Login() {
         <div className="auth-form-panel">
           <PaperBackground />
           <div className="auth-container">
-            <h1>Welcome back</h1>
+            <h1>{t("auth.welcomeBack")}</h1>
 
-            <p className="subtitle">Sign in to your Waraq account</p>
+            <p className="subtitle">{t("auth.signInSubtitle")}</p>
 
             <div className="auth-tabs">
               <button className="tab" onClick={() => navigate("/Register")}>
-                Sign Up
+                {t("auth.signUp")}
               </button>
 
               <button className="tab active" onClick={() => navigate("/Login")}>
-                Log In
+                {t("auth.logIn")}
               </button>
             </div>
 
@@ -132,11 +134,11 @@ function Login() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Email Address</label>
+                <label>{t("auth.emailLabel")}</label>
                 <input
                     type="email"
                     name="email"
-                    placeholder="ahmad@example.com"
+                    placeholder={t("auth.emailPlaceholder")}
                     value={form.email}
                     onChange={handleChange}
                 />
@@ -144,11 +146,11 @@ function Login() {
               </div>
 
               <div className="form-group">
-                <label>Password</label>
+                <label>{t("auth.passwordLabel")}</label>
                 <input
                     type="password"
                     name="password"
-                    placeholder="Your password"
+                    placeholder={t("auth.passwordPlaceholder")}
                     value={form.password}
                     onChange={handleChange}
                 />
@@ -157,13 +159,12 @@ function Login() {
                 )}
               </div>
 
-
               <button
                   className="primary-button"
                   type="submit"
                   disabled={loading}
               >
-                {loading ? "Logging in..." : "Log In"}
+                {loading ? t("auth.loggingIn") : t("auth.logIn")}
               </button>
             </form>
           </div>

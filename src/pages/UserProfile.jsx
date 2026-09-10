@@ -40,10 +40,16 @@ export default function UserProfile() {
             }
 
             // Fetch public listings for this user
-            const listingsRes = await fetch(`${API_BASE}/listings?publisher_id=${id}&limit=20`);
+            const listingsRes = await fetch(`${API_BASE}/listings?limit=100`);
             if (listingsRes.ok) {
                 const listingsData = await listingsRes.json();
-                setListings(Array.isArray(listingsData) ? listingsData : []);
+                if (Array.isArray(listingsData)) {
+                    // Manually filter by publisher_id in case the backend doesn't support the query param
+                    const userListings = listingsData.filter(item => String(item.publisher_id) === String(id));
+                    setListings(userListings);
+                } else {
+                    setListings([]);
+                }
             }
         } catch (err) {
             console.error("Failed to load user profile data:", err);

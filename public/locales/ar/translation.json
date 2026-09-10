@@ -29,5 +29,26 @@
     "loading": "جاري التحميل...",
     "active": "نشط",
     "sold": "مباع"
+  },
+  "auth": {
+    "welcomeBack": "أهلاً بك مجدداً",
+    "signInSubtitle": "سجل الدخول إلى حسابك في ورق",
+    "signUp": "إنشاء حساب",
+    "logIn": "تسجيل الدخول",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "ahmad@example.com",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "كلمة المرور الخاصة بك",
+    "loggingIn": "جاري تسجيل الدخول...",
+    "createAccount": "إنشاء حساب جديد",
+    "registerSubtitle": "انضم إلى منصة ورق وابدأ ببيع وشراء الكتب",
+    "fullName": "الاسم الكامل",
+    "fullNamePlaceholder": "أحمد محمد",
+    "university": "الجامعة",
+    "selectUniversity": "اختر جامعتك",
+    "phoneNumber": "رقم الهاتف",
+    "phonePlaceholder": "079 123 4567",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "creatingAccount": "جاري إنشاء الحساب..."
   }
 }
