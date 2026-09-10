@@ -1,8 +1,24 @@
+/* --- Outer Page Layout --- */
+.listings-page-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
+}
+
+.listings-content-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* --- Header Section --- */
 .my-listings-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin: 28px 0 20px;
+    margin: 32px 0 24px;
 }
 
 .my-listings-header h1 {
@@ -18,6 +34,9 @@
 }
 
 .post-new-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background-color: #f97316;
     color: #fff;
     border: none;
@@ -33,22 +52,24 @@
     background-color: #ea580c;
 }
 
+/* --- Tabs --- */
 .listings-tabs {
     display: flex;
-    gap: 24px;
+    gap: 28px;
     border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .tab {
     background: none;
     border: none;
-    padding: 10px 2px;
+    padding: 10px 4px;
     font-size: 15px;
     font-weight: 600;
     color: #94a3b8;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .tab.active {
@@ -56,15 +77,69 @@
     border-bottom-color: #f97316;
 }
 
-.listings-status {
+/* --- Status & Loading --- */
+.listings-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
     color: #64748b;
-    padding: 20px 0;
+    gap: 12px;
+}
+
+.spinner-icon {
+    animation: spin 1s linear infinite;
+    color: #f97316;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .listings-status.error {
     color: #ef4444;
+    padding: 20px 0;
+    text-align: center;
+    font-weight: 600;
 }
 
+/* --- Empty Box --- */
+.listings-empty-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.listings-empty-box .empty-icon {
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.listings-empty-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.listings-empty-box p {
+    font-size: 13.5px;
+    color: #64748b;
+}
+
+/* --- Listings List & Rows --- */
 .listings-list {
     display: flex;
     flex-direction: column;
@@ -82,12 +157,30 @@
     box-shadow: 0 2px 10px rgba(18, 52, 91, 0.04);
 }
 
-.listing-thumb {
-    width: 64px;
-    height: 64px;
+.listing-thumb-wrap {
+    width: 68px;
+    height: 68px;
     border-radius: 10px;
-    object-fit: cover;
+    overflow: hidden;
     flex-shrink: 0;
+    background: #f1f5f9;
+}
+
+.listing-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.listing-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #94a3b8;
 }
 
 .listing-main {
@@ -147,9 +240,16 @@
 
 .listing-meta {
     display: flex;
+    align-items: center;
     gap: 16px;
     color: #94a3b8;
     font-size: 12.5px;
+}
+
+.meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .listing-price-col {
@@ -187,14 +287,18 @@
     color: #2563eb;
 }
 
+/* --- Action Buttons --- */
 .listing-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-width: 140px;
+    min-width: 135px;
 }
 
 .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     border: 1px solid #e2e8f0;
     background: #fff;
     border-radius: 8px;
@@ -202,11 +306,16 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    text-align: left;
+    transition: all 0.15s ease;
 }
 
 .action-btn.edit {
     color: #12345b;
+}
+
+.action-btn.edit:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .action-btn.sold {
@@ -214,7 +323,29 @@
     border-color: #bbf7d0;
 }
 
+.action-btn.sold:hover {
+    background: #f0fdf4;
+}
+
 .action-btn.delete {
     color: #ef4444;
     border-color: #fecaca;
+}
+
+.action-btn.delete:hover {
+    background: #fef2f2;
+}
+
+@media (max-width: 768px) {
+    .listing-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .listing-price-col {
+        align-items: flex-start;
+    }
+    .listing-actions {
+        width: 100%;
+        flex-direction: row;
+    }
 }

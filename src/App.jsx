@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import MyListings from "./pages/MyListings";
 import EditProfile from "./pages/EditProfile";
+import EditListing from "./pages/EditListing";
 import ListingDetails from "./pages/ListingDetails";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -31,7 +32,6 @@ function AppRoutes() {
             />
 
             <Route path="/home" element={<Home />} />
-            <Route path="/books/:id" element={<ListingDetails />} />
 
             <Route element={<PrivateRoute />}>
                 <Route path="/profile" element={<Profile />} />
