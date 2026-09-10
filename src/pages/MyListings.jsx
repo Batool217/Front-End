@@ -175,27 +175,22 @@ export default function MyListings() {
                 {!loading && !error && listings.length > 0 && (
                     <div className="listings-list">
                         {listings.map((item) => {
-                            const rawImg = item.image || item.imageUrl || item.image_url;
+                            const rawImg = item.image || item.imageUrl || item.image_url || (item.imagesUrl && item.imagesUrl[0]) || (item.images_url && item.images_url[0]);
                             const resolvedImg = resolveImageUrl(rawImg);
-                            const isBroken = brokenImages[item.id] || !resolvedImg;
+                            const defaultCover = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&q=80";
+                            const displayImage = (!brokenImages[item.id] && resolvedImg) ? resolvedImg : defaultCover;
 
                             return (
                                 <div className="listing-row" key={item.id}>
                                     <div className="listing-thumb-wrap">
-                                        {isBroken ? (
-                                            <div className="listing-thumb-placeholder">
-                                                <BookOpen size={24} />
-                                            </div>
-                                        ) : (
-                                            <img
-                                                className="listing-thumb"
-                                                src={resolvedImg}
-                                                alt={item.title}
-                                                onError={() =>
-                                                    setBrokenImages((prev) => ({ ...prev, [item.id]: true }))
-                                                }
-                                            />
-                                        )}
+                                        <img
+                                            className="listing-thumb"
+                                            src={displayImage}
+                                            alt={item.title}
+                                            onError={() =>
+                                                setBrokenImages((prev) => ({ ...prev, [item.id]: true }))
+                                            }
+                                        />
                                     </div>
 
                                     <div className="listing-main">

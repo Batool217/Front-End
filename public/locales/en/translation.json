@@ -1,0 +1,33 @@
+{
+  "navbar": {
+    "searchPlaceholder": "Search books, authors, or ISBN...",
+    "postNewBook": "Post New Book",
+    "browse": "Browse",
+    "login": "Login",
+    "register": "Register",
+    "myProfile": "My Profile",
+    "myListings": "My Listings",
+    "editProfile": "Edit Profile",
+    "logout": "Logout"
+  },
+  "home": {
+    "heroTagline": "JORDAN'S COMMUNITY BOOK MARKETPLACE",
+    "heroTitle": "Buy, sell, and exchange<br />books across Jordan",
+    "heroSubtitle": "Discover thousands of books, novels, and educational resources from readers across the Kingdom",
+    "addBook": "Add a Book",
+    "recentListings": "Recent Listings",
+    "results": "results",
+    "viewAll": "View all →",
+    "loading": "Loading available books...",
+    "noBooks": "No books found matching your search criteria."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "active": "Active",
+    "sold": "Sold"
+  }
+}

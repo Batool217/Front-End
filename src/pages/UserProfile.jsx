@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import AddBookModal from "../components/AddBookModal";
-import { BookOpen, UserPen, LogOut, ChevronRight, GraduationCap, PlusCircle, Loader2 } from "lucide-react";
+import { BookOpen, GraduationCap, Loader2 } from "lucide-react";
 import "../styles/css/profile.css";
 
 const API_BASE = "http://localhost:8080/api/v1";
@@ -18,75 +16,45 @@ const resolveImageUrl = (path) => {
     return `${BACKEND_URL}${cleanPath}`;
 };
 
-export default function Profile() {
+export default function UserProfile() {
+    const { id } = useParams();
     const navigate = useNavigate();
-    const { user, token, logout } = useAuth();
 
     const [profile, setProfile] = useState(null);
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const [brokenImages, setBrokenImages] = useState({});
     const [avatarFailed, setAvatarFailed] = useState(false);
 
     const loadProfileData = useCallback(async () => {
-        // Wait until token is available
-        if (!token) return;
-
+        if (!id) return;
         setLoading(true);
-        const headers = { Authorization: `Bearer ${token}` };
-        const resolvedUserId = user?.user_id || user?.userId || user?.id;
 
         try {
-            // Fetch listings using /my (does not require user ID in URL)
-            const listingsPromise = fetch(`${API_BASE}/listings/my?status=active&limit=3`, { headers });
-            
-            // Fetch profile data if user ID is resolved
-            const profilePromise = resolvedUserId 
-                ? fetch(`${API_BASE}/users/${resolvedUserId}/profile`, { headers })
-                : Promise.resolve(null);
-
-            const [listingsRes, profileRes] = await Promise.all([listingsPromise, profilePromise]);
-
-            if (listingsRes.ok) {
-                const listingsData = await listingsRes.json();
-                setListings(Array.isArray(listingsData) ? listingsData : []);
-            } else {
-                console.error("Failed to fetch listings:", listingsRes.status);
-            }
-
-            if (profileRes && profileRes.ok) {
+            // Fetch profile data
+            const profileRes = await fetch(`${API_BASE}/users/${id}/profile`);
+            if (profileRes.ok) {
                 const profileData = await profileRes.json();
                 setProfile(profileData);
             }
+
+            // Fetch public listings for this user
+            const listingsRes = await fetch(`${API_BASE}/listings?publisher_id=${id}&limit=20`);
+            if (listingsRes.ok) {
+                const listingsData = await listingsRes.json();
+                setListings(Array.isArray(listingsData) ? listingsData : []);
+            }
         } catch (err) {
-            console.error("Failed to load profile data:", err);
+            console.error("Failed to load user profile data:", err);
         } finally {
             setLoading(false);
         }
-    }, [user, token]);
+    }, [id]);
 
     useEffect(() => {
-        let isMounted = true;
-
-        if (isMounted) {
-            void loadProfileData();
-        }
-
-        return () => {
-            isMounted = false;
-        };
+        loadProfileData();
     }, [loadProfileData]);
-
-    const handleLogout = async () => {
-        await logout();
-        navigate("/login");
-    };
-
-    const handleBookAdded = () => {
-        void loadProfileData();
-    };
 
     const formatMemberSince = (data) => {
         const raw = data?.member_since || data?.memberSince || data?.created_at || data?.createdAt;
@@ -108,8 +76,7 @@ export default function Profile() {
         }
     };
 
-    const displayName = profile?.full_name || profile?.fullName || profile?.name || user?.name || "User";
-    const phoneNumber = profile?.phone_number || profile?.phoneNumber || user?.phone_number || user?.phoneNumber;
+    const displayName = profile?.full_name || profile?.fullName || profile?.name || "User";
     const memberSince = formatMemberSince(profile);
 
     const rawProfileImg = profile?.profile_image || profile?.profileImage;
@@ -133,43 +100,17 @@ export default function Profile() {
                             />
                         </div>
                         <h2>{displayName}</h2>
-                        {phoneNumber && <p className="profile-phone">{phoneNumber}</p>}
                         <p className="profile-member-since">
                             {memberSince ? `Member since ${memberSince}` : "Member"}
                         </p>
-
-                        <div className="profile-nav">
-                            <button onClick={() => navigate("/mylistings")}>
-                                <div className="profile-nav-left">
-                                    <BookOpen size={18} className="profile-nav-icon" />
-                                    <span>My Listings</span>
-                                </div>
-                                <ChevronRight size={16} className="profile-nav-chevron" />
-                            </button>
-
-                            <button onClick={() => navigate("/editprofile")}>
-                                <div className="profile-nav-left">
-                                    <UserPen size={18} className="profile-nav-icon" />
-                                    <span>Edit Profile</span>
-                                </div>
-                                <ChevronRight size={16} className="profile-nav-chevron" />
-                            </button>
-
-                            <button className="logout" onClick={handleLogout}>
-                                <div className="profile-nav-left">
-                                    <LogOut size={18} className="profile-nav-icon" />
-                                    <span>Logout</span>
-                                </div>
-                            </button>
-                        </div>
                     </aside>
 
                     {/* Main Content Area */}
                     <main className="profile-main">
                         <div className="profile-main-header">
-                            <h2>My Listings</h2>
-                            <span className="view-all-link" onClick={() => navigate("/mylistings")}>
-                                View all
+                            <h2>{displayName}'s Listings</h2>
+                            <span className="view-all-link">
+                                {listings.length} active listings
                             </span>
                         </div>
 
@@ -224,24 +165,13 @@ export default function Profile() {
                         ) : (
                             <div className="empty-listings-box">
                                 <BookOpen size={42} className="empty-icon" />
-                                <h3>No active listings yet</h3>
-                                <p>You haven't listed any books for sale or exchange.</p>
-                                <button className="add-listing-btn" onClick={() => setIsAddModalOpen(true)}>
-                                    <PlusCircle size={16} />
-                                    <span>Post a Book</span>
-                                </button>
+                                <h3>No active listings</h3>
+                                <p>This user hasn't listed any books yet.</p>
                             </div>
                         )}
                     </main>
                 </div>
             </div>
-
-            {/* Add Book Modal */}
-            <AddBookModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onBookAdded={handleBookAdded}
-            />
         </div>
     );
 }

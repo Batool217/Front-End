@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, BookOpen, UserPen, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { User, BookOpen, UserPen, LogOut, Globe } from 'lucide-react';
 import FilterModal from './FilterModal';
 import '../styles/css/navbar.css';
 import logoImg from "../assets/logo.png";
@@ -20,6 +21,7 @@ const resolveImageUrl = (path) => {
 const Navbar = ({ onSearch, onFilterChange }) => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout } = useAuth();
+    const { t, i18n } = useTranslation();
 
     const [query, setQuery] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -65,6 +67,11 @@ const Navbar = ({ onSearch, onFilterChange }) => {
         navigate('/login');
     };
 
+    const toggleLanguage = () => {
+        const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+        i18n.changeLanguage(newLang);
+    };
+
     const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff&size=128`;
     const avatarSrc = (!avatarError && resolvedAvatarUrl) ? resolvedAvatarUrl : fallbackAvatarUrl;
 
@@ -83,7 +90,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Search books, authors, subjects..."
+                            placeholder={t("navbar.searchPlaceholder")}
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
@@ -119,13 +126,29 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                 </div>
             </div>
 
-            <div className="nav-right">
+            <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button
+                    type="button"
+                    onClick={toggleLanguage}
+                    style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        color: '#f8fafc', fontWeight: '500', fontSize: '14px',
+                        padding: '6px 12px', borderRadius: '8px', transition: 'background 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'none'}
+                >
+                    <Globe size={16} />
+                    <span>{i18n.language === 'ar' ? 'EN' : 'عربي'}</span>
+                </button>
+
                 <button
                     type="button"
                     className="nav-link-btn"
                     onClick={handleBrowseClick}
                 >
-                    Browse
+                    {t("navbar.browse")}
                 </button>
 
                 {isAuthenticated ? (
@@ -167,19 +190,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                     }}
                                 >
                                     <User size={16} className="dropdown-icon" />
-                                    <span>My Profile</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        setIsProfileOpen(false);
-                                        navigate("/mylistings");
-                                    }}
-                                >
-                                    <BookOpen size={16} className="dropdown-icon" />
-                                    <span>My Listings</span>
+                                    <span>{t("navbar.myProfile")}</span>
                                 </button>
 
                                 <button
@@ -191,7 +202,19 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                     }}
                                 >
                                     <UserPen size={16} className="dropdown-icon" />
-                                    <span>Edit Profile</span>
+                                    <span>{t("navbar.editProfile")}</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setIsProfileOpen(false);
+                                        navigate("/mylistings");
+                                    }}
+                                >
+                                    <BookOpen size={16} className="dropdown-icon" />
+                                    <span>{t("navbar.myListings")}</span>
                                 </button>
 
                                 <div className="dropdown-divider"></div>
@@ -202,7 +225,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                     onClick={handleLogoutClick}
                                 >
                                     <LogOut size={16} className="dropdown-icon" />
-                                    <span>Log Out</span>
+                                    <span>{t("navbar.logout")}</span>
                                 </button>
                             </div>
                         )}
@@ -213,7 +236,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                         className="nav-link-btn"
                         onClick={() => navigate('/login')}
                     >
-                        Log In
+                        {t("navbar.login")}
                     </button>
                 )}
             </div>
