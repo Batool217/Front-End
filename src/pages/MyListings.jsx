@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import ConfirmModal from "../components/ConfirmModal";
 import { Plus, BookOpen, Eye, Heart, Clock, PenLine, CheckCircle2, Trash2 } from "lucide-react";
 import "../styles/css/mylistings.css";
 
@@ -39,6 +40,10 @@ export default function MyListings() {
     const [error, setError] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [brokenImages, setBrokenImages] = useState({});
+    
+    // Delete Modal State
+    const [deleteTargetId, setDeleteTargetId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const authHeaders = useCallback(
         () => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
@@ -98,19 +103,27 @@ export default function MyListings() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Delete this listing permanently?")) return;
+    const confirmDelete = async () => {
+        if (!deleteTargetId) return;
+        setIsDeleting(true);
         try {
-            const res = await fetch(`${API_BASE}/listings/${id}`, {
+            const res = await fetch(`${API_BASE}/listings/${deleteTargetId}`, {
                 method: "DELETE",
                 headers: authHeaders(),
             });
             if (!res.ok) throw new Error("Failed to delete listing.");
-            setListings((prev) => prev.filter((l) => l.id !== id));
+            setListings((prev) => prev.filter((l) => l.id !== deleteTargetId));
             fetchCounts();
+            setDeleteTargetId(null);
         } catch (err) {
             alert(err.message);
+        } finally {
+            setIsDeleting(false);
         }
+    };
+
+    const handleDeleteClick = (id) => {
+        setDeleteTargetId(id);
     };
 
     const handleEdit = (id) => {
@@ -232,7 +245,7 @@ export default function MyListings() {
                                                 <span>Mark as Sold</span>
                                             </button>
                                         )}
-                                        <button className="action-btn delete" onClick={() => handleDelete(item.id)}>
+                                        <button className="action-btn delete" onClick={() => handleDeleteClick(item.id)}>
                                             <Trash2 size={14} />
                                             <span>Delete</span>
                                         </button>
@@ -243,6 +256,17 @@ export default function MyListings() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={!!deleteTargetId}
+                onClose={() => setDeleteTargetId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Listing"
+                message="Are you sure you want to permanently delete this listing? This action cannot be undone."
+                confirmText="Delete"
+                isDestructive={true}
+                isProcessing={isDeleting}
+            />
         </div>
     );
 }

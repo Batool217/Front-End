@@ -111,7 +111,7 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
                                     (book.imagesUrl && book.imagesUrl[0]) ||
                                     (book.images_url && book.images_url[0])
                                 }
-                                onClick={() => navigate(`/books/${bookId}`)}
+                                onClick={() => navigate(`/listing/${bookId}`)}
                             />
                         );
                     })}

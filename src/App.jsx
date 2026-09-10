@@ -32,11 +32,13 @@ function AppRoutes() {
             />
 
             <Route path="/home" element={<Home />} />
+            <Route path="/listing/:id" element={<ListingDetails />} />
 
             <Route element={<PrivateRoute />}>
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/mylistings" element={<MyListings />} />
                 <Route path="/editprofile" element={<EditProfile />} />
+                <Route path="/edit-listing/:id" element={<EditListing />} />
             </Route>
 
             {/* Fallback */}
