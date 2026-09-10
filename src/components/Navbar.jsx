@@ -1,9 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { User, BookOpen, UserPen, LogOut } from 'lucide-react';
 import FilterModal from './FilterModal';
 import '../styles/css/navbar.css';
 import logoImg from "../assets/logo.png";
+
+const BACKEND_URL = "http://localhost:8080";
+
+const resolveImageUrl = (path) => {
+    if (!path || typeof path !== "string" || path.trim() === "" || path === "null") return null;
+    if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+        return path;
+    }
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${BACKEND_URL}${cleanPath}`;
+};
 
 const Navbar = ({ onSearch, onFilterChange }) => {
     const navigate = useNavigate();
@@ -12,9 +24,17 @@ const Navbar = ({ onSearch, onFilterChange }) => {
     const [query, setQuery] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
     const profileRef = useRef(null);
 
-    // Close profile dropdown when clicking outside
+    const displayName = user?.full_name || user?.fullName || user?.name || "User";
+    const rawAvatar = user?.profile_image || user?.profileImage;
+    const resolvedAvatarUrl = resolveImageUrl(rawAvatar);
+
+    useEffect(() => {
+        setAvatarError(false);
+    }, [rawAvatar]);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -45,8 +65,8 @@ const Navbar = ({ onSearch, onFilterChange }) => {
         navigate('/login');
     };
 
-    const displayName = user?.name || "User";
-    const avatarUrl = `https://ui-avatars.com/api/v1/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff`;
+    const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff&size=128`;
+    const avatarSrc = (!avatarError && resolvedAvatarUrl) ? resolvedAvatarUrl : fallbackAvatarUrl;
 
     return (
         <header className="navbar">
@@ -57,7 +77,6 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                 <span className="logo-text">Waraq</span>
             </div>
 
-            {/* 2. Search & Filter Section */}
             <div className="nav-center">
                 <div className="search-wrapper">
                     <form className="search-form" onSubmit={handleSearchSubmit}>
@@ -81,7 +100,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                         </button>
 
                         <button
-                            type="submit"
+                            type="button"
                             className="search-btn"
                             aria-label="Search"
                         >
@@ -92,7 +111,6 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                         </button>
                     </form>
 
-                    {/* Filter Modal Anchored Under Filter Icon */}
                     <FilterModal
                         isOpen={isFilterOpen}
                         onClose={() => setIsFilterOpen(false)}
@@ -101,7 +119,6 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                 </div>
             </div>
 
-            {/* 3. Navigation Links & Avatar Profile Dropdown */}
             <div className="nav-right">
                 <button
                     type="button"
@@ -117,15 +134,26 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                             className="avatar-container"
                             onClick={() => setIsProfileOpen((prev) => !prev)}
                             title={displayName}
+                            style={{ cursor: "pointer" }}
                         >
-                            <img src={avatarUrl} alt={displayName} />
+                            <img
+                                src={avatarSrc}
+                                alt={displayName}
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    borderRadius: "50%",
+                                    objectFit: "cover"
+                                }}
+                                onError={() => setAvatarError(true)}
+                            />
                         </div>
 
                         {isProfileOpen && (
                             <div className="user-dropdown">
                                 <div className="user-info">
-                                    <strong>{user?.name}</strong>
-                                    <span>{user?.email}</span>
+                                    <strong title={displayName}>{displayName}</strong>
+                                    <span title={user?.email}>{user?.email}</span>
                                 </div>
 
                                 <div className="dropdown-divider"></div>
@@ -138,7 +166,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                         navigate("/profile");
                                     }}
                                 >
-                                    <span>👤</span>
+                                    <User size={16} className="dropdown-icon" />
                                     <span>My Profile</span>
                                 </button>
 
@@ -150,7 +178,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                         navigate("/mylistings");
                                     }}
                                 >
-                                    <span>📚</span>
+                                    <BookOpen size={16} className="dropdown-icon" />
                                     <span>My Listings</span>
                                 </button>
 
@@ -162,7 +190,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                         navigate("/editprofile");
                                     }}
                                 >
-                                    <span>✏️</span>
+                                    <UserPen size={16} className="dropdown-icon" />
                                     <span>Edit Profile</span>
                                 </button>
 
@@ -173,7 +201,7 @@ const Navbar = ({ onSearch, onFilterChange }) => {
                                     className="dropdown-item logout-item"
                                     onClick={handleLogoutClick}
                                 >
-                                    <span>↪</span>
+                                    <LogOut size={16} className="dropdown-icon" />
                                     <span>Log Out</span>
                                 </button>
                             </div>

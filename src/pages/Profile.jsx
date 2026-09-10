@@ -2,10 +2,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import { BookOpen, UserPen, LogOut, ChevronRight, User, GraduationCap } from "lucide-react";
+import AddBookModal from "../components/AddBookModal";
+import { BookOpen, UserPen, LogOut, ChevronRight, GraduationCap, PlusCircle, Loader2 } from "lucide-react";
 import "../styles/css/profile.css";
 
 const API_BASE = "http://localhost:8080/api/v1";
+const BACKEND_URL = "http://localhost:8080";
+
+const resolveImageUrl = (path) => {
+    if (!path || typeof path !== "string" || path.trim() === "" || path === "null") return null;
+    if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+        return path;
+    }
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${BACKEND_URL}${cleanPath}`;
+};
 
 export default function Profile() {
     const navigate = useNavigate();
@@ -14,152 +25,229 @@ export default function Profile() {
     const [profile, setProfile] = useState(null);
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    const fetchData = useCallback(async () => {
-        // ننتظر حتى يتوفر التوكن
+    const [brokenImages, setBrokenImages] = useState({});
+    const [avatarFailed, setAvatarFailed] = useState(false);
+
+    const loadProfileData = useCallback(async () => {
+        // Wait until token is available
         if (!token) return;
 
         setLoading(true);
-        try {
-            const headers = { Authorization: `Bearer ${token}` };
+        const headers = { Authorization: `Bearer ${token}` };
+        const resolvedUserId = user?.user_id || user?.userId || user?.id;
 
-            // 1. جلب الإعلانات (لا تحتاج userId لأننا نستخدم /my)
-            const listingsRes = await fetch(`${API_BASE}/listings/my?status=active&limit=3`, { headers });
+        try {
+            // Fetch listings using /my (does not require user ID in URL)
+            const listingsPromise = fetch(`${API_BASE}/listings/my?status=active&limit=3`, { headers });
+            
+            // Fetch profile data if user ID is resolved
+            const profilePromise = resolvedUserId 
+                ? fetch(`${API_BASE}/users/${resolvedUserId}/profile`, { headers })
+                : Promise.resolve(null);
+
+            const [listingsRes, profileRes] = await Promise.all([listingsPromise, profilePromise]);
+
             if (listingsRes.ok) {
-                setListings(await listingsRes.json());
+                const listingsData = await listingsRes.json();
+                setListings(Array.isArray(listingsData) ? listingsData : []);
             } else {
                 console.error("Failed to fetch listings:", listingsRes.status);
             }
 
-            // 2. جلب الملف الشخصي (فقط إذا كان الـ userId أو id متوفراً)
-            const actualUserId = user?.userId || user?.id;
-            if (actualUserId) {
-                const profileRes = await fetch(`${API_BASE}/users/${actualUserId}/profile`, { headers });
-                if (profileRes.ok) {
-                    setProfile(await profileRes.json());
-                }
-            } else {
-                console.warn("User ID is missing from AuthContext:", user);
+            if (profileRes && profileRes.ok) {
+                const profileData = await profileRes.json();
+                setProfile(profileData);
             }
-
-        } catch (error) {
-            console.error("Failed to load data:", error);
+        } catch (err) {
+            console.error("Failed to load profile data:", err);
         } finally {
-            // نضمن دائماً إيقاف شاشة التحميل في النهاية
             setLoading(false);
         }
     }, [user, token]);
 
-
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        let isMounted = true;
+
+        if (isMounted) {
+            void loadProfileData();
+        }
+
+        return () => {
+            isMounted = false;
+        };
+    }, [loadProfileData]);
 
     const handleLogout = async () => {
         await logout();
         navigate("/login");
     };
 
-    const memberSince = profile?.memberSince
-        ? new Date(profile.memberSince).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-        : "";
+    const handleBookAdded = () => {
+        void loadProfileData();
+    };
+
+    const formatMemberSince = (data) => {
+        const raw = data?.member_since || data?.memberSince || data?.created_at || data?.createdAt;
+        if (!raw) return null;
+
+        try {
+            if (Array.isArray(raw)) {
+                const [year, month, day] = raw;
+                const d = new Date(year, month - 1, day);
+                return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+            }
+
+            const d = new Date(raw);
+            if (isNaN(d.getTime())) return null;
+
+            return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        } catch {
+            return null;
+        }
+    };
+
+    const displayName = profile?.full_name || profile?.fullName || profile?.name || user?.name || "User";
+    const phoneNumber = profile?.phone_number || profile?.phoneNumber || user?.phone_number || user?.phoneNumber;
+    const memberSince = formatMemberSince(profile);
+
+    const rawProfileImg = profile?.profile_image || profile?.profileImage;
+    const profileImageUrl = resolveImageUrl(rawProfileImg);
+    const defaultAvatarUrl = `https://ui-avatars.com/api/v1/?name=${encodeURIComponent(displayName)}&background=f97316&color=fff&size=128`;
 
     return (
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px" }}>
+        <div className="profile-page-wrapper">
             <Navbar />
 
-            <div className="profile-layout">
-                <aside className="profile-sidebar">
-                    <div className="profile-avatar-wrap">
-                        {profile?.profileImage ? (
-                            <img src={profile.profileImage} alt="avatar" className="profile-avatar" />
-                        ) : (
-                            <div className="profile-avatar placeholder">
-                                <User size={40} />
-                            </div>
-                        )}
-                    </div>
-                    <h2>{profile?.fullName || "..."}</h2>
-                    <p className="profile-phone">{profile?.phoneNumber}</p>
-                    {memberSince && <p className="profile-member-since">Member since {memberSince}</p>}
+            <div className="profile-content-container">
+                <div className="profile-layout">
+                    {/* Left Sidebar */}
+                    <aside className="profile-sidebar">
+                        <div className="profile-avatar-wrap">
+                            <img
+                                src={!avatarFailed && profileImageUrl ? profileImageUrl : defaultAvatarUrl}
+                                alt={displayName}
+                                className="profile-avatar"
+                                onError={() => setAvatarFailed(true)}
+                            />
+                        </div>
+                        <h2>{displayName}</h2>
+                        {phoneNumber && <p className="profile-phone">{phoneNumber}</p>}
+                        <p className="profile-member-since">
+                            {memberSince ? `Member since ${memberSince}` : "Member"}
+                        </p>
 
-                    <div className="profile-nav">
-                        <button onClick={() => navigate("/mylistings")}>
-                            <div className="profile-nav-left">
-                                <BookOpen size={18} className="profile-nav-icon" />
-                                <span>My Listings</span>
-                            </div>
-                            <ChevronRight size={16} className="profile-nav-chevron" />
-                        </button>
+                        <div className="profile-nav">
+                            <button onClick={() => navigate("/mylistings")}>
+                                <div className="profile-nav-left">
+                                    <BookOpen size={18} className="profile-nav-icon" />
+                                    <span>My Listings</span>
+                                </div>
+                                <ChevronRight size={16} className="profile-nav-chevron" />
+                            </button>
 
-                        <button onClick={() => navigate("/editprofile")}>
-                            <div className="profile-nav-left">
-                                <UserPen size={18} className="profile-nav-icon" />
-                                <span>Edit Profile</span>
-                            </div>
-                            <ChevronRight size={16} className="profile-nav-chevron" />
-                        </button>
+                            <button onClick={() => navigate("/editprofile")}>
+                                <div className="profile-nav-left">
+                                    <UserPen size={18} className="profile-nav-icon" />
+                                    <span>Edit Profile</span>
+                                </div>
+                                <ChevronRight size={16} className="profile-nav-chevron" />
+                            </button>
 
-                        <button className="logout" onClick={handleLogout}>
-                            <div className="profile-nav-left">
-                                <LogOut size={18} className="profile-nav-icon" />
-                                <span>Logout</span>
-                            </div>
-                        </button>
-                    </div>
-                </aside>
-
-                <main className="profile-main">
-                    <div className="profile-main-header">
-                        <h2>My Listings</h2>
-                        <span className="view-all-link" onClick={() => navigate("/mylistings")} style={{ cursor: "pointer", color: "#e67e22" }}>
-                            View all
-                        </span>
-                    </div>
-
-                    {loading ? (
-                        <p style={{ color: "#6b7280" }}>Loading your listings...</p>
-                    ) : listings.length === 0 ? (
-                        <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#f9fafb", borderRadius: "8px", marginTop: "20px" }}>
-                            <p style={{ color: "#6b7280", marginBottom: "15px" }}>You haven't posted any books yet.</p>
-                            <button
-                                onClick={() => navigate("/")}
-                                style={{ backgroundColor: "#e67e22", color: "white", padding: "8px 16px", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>
-                                + Post New Book
+                            <button className="logout" onClick={handleLogout}>
+                                <div className="profile-nav-left">
+                                    <LogOut size={18} className="profile-nav-icon" />
+                                    <span>Logout</span>
+                                </div>
                             </button>
                         </div>
-                    ) : (
-                        <div className="profile-listings-grid">
-                            {listings.map((item) => (
-                                <div className="mini-card" key={item.id} onClick={() => navigate(`/listing/${item.id}`)} style={{ cursor: "pointer" }}>
-                                    <div className="mini-card-image-wrap">
-                                        {item.isExchange && <span className="mini-badge swap">SWAP</span>}
-                                        <img src={item.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80"} alt={item.title} />
-                                    </div>
-                                    <div className="mini-card-body">
-                                        <h4>{item.title}</h4>
-                                        <p>{item.author}</p>
-                                        <div className="mini-card-footer">
-                                            {item.isExchange ? (
-                                                <span className="mini-price exchange">Exchange</span>
-                                            ) : (
-                                                <span className="mini-price">{Number(item.price).toFixed(0)} JD</span>
-                                            )}
-                                            <span className="mini-condition">{item.condition}</span>
-                                        </div>
-                                        {item.universityName && (
-                                            <p className="mini-university">
-                                                <GraduationCap size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
-                                                {item.universityName}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                    </aside>
+
+                    {/* Main Content Area */}
+                    <main className="profile-main">
+                        <div className="profile-main-header">
+                            <h2>My Listings</h2>
+                            <span className="view-all-link" onClick={() => navigate("/mylistings")}>
+                                View all
+                            </span>
                         </div>
-                    )}
-                </main>
+
+                        {loading ? (
+                            <div className="profile-loading-state">
+                                <Loader2 size={28} className="spinner-icon" />
+                                <p>Loading listings...</p>
+                            </div>
+                        ) : listings.length > 0 ? (
+                            <div className="profile-listings-grid">
+                                {listings.map((item) => {
+                                    const rawItemImg = item.image || item.imageUrl || item.image_url;
+                                    const resolvedImg = resolveImageUrl(rawItemImg);
+                                    const isBroken = brokenImages[item.id] || !resolvedImg;
+
+                                    return (
+                                        <div className="mini-card" key={item.id} onClick={() => navigate(`/listing/${item.id}`)}>
+                                            <div className="mini-card-image-wrap">
+                                                {item.isExchange && <span className="mini-badge swap">SWAP</span>}
+
+                                                {isBroken ? (
+                                                    <div className="mini-card-placeholder">
+                                                        <BookOpen size={36} className="placeholder-book-icon" />
+                                                        <span className="placeholder-text">No Cover Available</span>
+                                                    </div>
+                                                ) : (
+                                                    <img
+                                                        src={resolvedImg}
+                                                        alt={item.title}
+                                                        onError={() =>
+                                                            setBrokenImages((prev) => ({ ...prev, [item.id]: true }))
+                                                        }
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="mini-card-body">
+                                                <h4>{item.title}</h4>
+                                                <p>{item.author || "Unknown Author"}</p>
+                                                <div className="mini-card-footer">
+                                                    {item.isExchange ? (
+                                                        <span className="mini-price exchange">Exchange</span>
+                                                    ) : (
+                                                        <span className="mini-price">{Number(item.price || 0).toFixed(0)} JD</span>
+                                                    )}
+                                                    <span className="mini-condition">{item.condition || "Used"}</span>
+                                                </div>
+                                                {item.universityName && (
+                                                    <p className="mini-university">
+                                                        <GraduationCap size={14} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
+                                                        {item.universityName}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="empty-listings-box">
+                                <BookOpen size={42} className="empty-icon" />
+                                <h3>No active listings yet</h3>
+                                <p>You haven't listed any books for sale or exchange.</p>
+                                <button className="add-listing-btn" onClick={() => setIsAddModalOpen(true)}>
+                                    <PlusCircle size={16} />
+                                    <span>Post a Book</span>
+                                </button>
+                            </div>
+                        )}
+                    </main>
+                </div>
             </div>
+
+            {/* Add Book Modal */}
+            <AddBookModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onBookAdded={handleBookAdded}
+            />
         </div>
     );
 }

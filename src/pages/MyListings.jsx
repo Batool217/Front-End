@@ -2,9 +2,31 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import AddBookModal from "../components/AddBookModal";
+import {
+    Plus,
+    PenLine,
+    CheckCircle2,
+    Trash2,
+    Eye,
+    Heart,
+    Clock,
+    Loader2,
+    BookOpen
+} from "lucide-react";
 import "../styles/css/mylistings.css";
 
 const API_BASE = "http://localhost:8080/api/v1";
+const BACKEND_URL = "http://localhost:8080";
+
+const resolveImageUrl = (path) => {
+    if (!path || typeof path !== "string" || path.trim() === "" || path === "null") return null;
+    if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+        return path;
+    }
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${BACKEND_URL}${cleanPath}`;
+};
 
 function timeAgo(dateString) {
     if (!dateString) return "";
@@ -30,6 +52,10 @@ export default function MyListings() {
     const [counts, setCounts] = useState({ active_count: 0, sold_count: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [brokenImages, setBrokenImages] = useState({});
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    const resolvedUserId = user?.user_id || user?.userId || user?.id;
 
     const authHeaders = useCallback(
         () => ({ Authorization: `Bearer ${token}`, "Content-Type": "application/json" }),
@@ -42,7 +68,13 @@ export default function MyListings() {
             const res = await fetch(`${API_BASE}/listings/my/counts`, {
                 headers: authHeaders(),
             });
-            if (res.ok) setCounts(await res.json());
+            if (res.ok) {
+                const data = await res.json();
+                setCounts({
+                    active_count: data.active_count ?? data.activeCount ?? 0,
+                    sold_count: data.sold_count ?? data.soldCount ?? 0,
+                });
+            }
         } catch (err) {
             console.error("Failed to load counts:", err);
         }
@@ -58,7 +90,8 @@ export default function MyListings() {
                 { headers: authHeaders() }
             );
             if (!res.ok) throw new Error("Failed to load your listings.");
-            setListings(await res.json());
+            const data = await res.json();
+            setListings(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -67,12 +100,17 @@ export default function MyListings() {
     }, [token, activeTab, authHeaders]);
 
     useEffect(() => {
-        fetchCounts().catch((err) => console.error("Failed to load counts:", err));
+        void fetchCounts();
     }, [fetchCounts]);
 
     useEffect(() => {
-        fetchListings().catch((err) => console.error("Failed to load listings:", err));
+        void fetchListings();
     }, [fetchListings]);
+
+    const handleBookAdded = () => {
+        void fetchCounts();
+        void fetchListings();
+    };
 
     const handleMarkAsSold = async (id) => {
         try {
@@ -83,7 +121,7 @@ export default function MyListings() {
             });
             if (!res.ok) throw new Error("Failed to update listing.");
             setListings((prev) => prev.filter((l) => l.id !== id));
-            fetchCounts();
+            void fetchCounts();
         } catch (err) {
             alert(err.message);
         }
@@ -98,7 +136,7 @@ export default function MyListings() {
             });
             if (!res.ok) throw new Error("Failed to delete listing.");
             setListings((prev) => prev.filter((l) => l.id !== id));
-            fetchCounts();
+            void fetchCounts();
         } catch (err) {
             alert(err.message);
         }
@@ -108,35 +146,36 @@ export default function MyListings() {
         navigate(`/edit-listing/${id}`);
     };
 
-
     return (
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px" }}>
+        <div className="listings-page-wrapper">
             <Navbar />
 
-            <div className="my-listings-header">
-                <div>
-                    <h1>My Listings</h1>
-                    <p>Manage your books — edit, mark as sold, or remove.</p>
+            <div className="listings-content-container">
+                <div className="my-listings-header">
+                    <div>
+                        <h1>My Listings</h1>
+                        <p>Manage your books — edit, mark as sold, or remove.</p>
+                    </div>
+                    <button className="post-new-btn" onClick={() => setIsAddModalOpen(true)}>
+                        <Plus size={16} />
+                        <span>Post New Book</span>
+                    </button>
                 </div>
-                <button className="post-new-btn" onClick={() => navigate("/")}>
-                    + Post New Book
-                </button>
-            </div>
 
-            <div className="listings-tabs">
-                <button
-                    className={activeTab === "active" ? "tab active" : "tab"}
-                    onClick={() => setActiveTab("active")}
-                >
-                    Active ({counts.active_count})
-                </button>
-                <button
-                    className={activeTab === "sold" ? "tab active" : "tab"}
-                    onClick={() => setActiveTab("sold")}
-                >
-                    Sold ({counts.sold_count})
-                </button>
-            </div>
+                <div className="listings-tabs">
+                    <button
+                        className={activeTab === "active" ? "tab active" : "tab"}
+                        onClick={() => setActiveTab("active")}
+                    >
+                        Active ({counts.active_count})
+                    </button>
+                    <button
+                        className={activeTab === "sold" ? "tab active" : "tab"}
+                        onClick={() => setActiveTab("sold")}
+                    >
+                        Sold ({counts.sold_count})
+                    </button>
+                </div>
 
             {loading && <p className="listings-status">Loading...</p>}
             {error && <p className="listings-status error">{error}</p>}
@@ -200,10 +239,101 @@ export default function MyListings() {
                             <button className="action-btn delete" onClick={() => handleDelete(item.id)}>
                                 🗑️ Delete
                             </button>
-                        </div>
+                        )}
                     </div>
-                ))}
+                )}
+
+                {!loading && !error && listings.length > 0 && (
+                    <div className="listings-list">
+                        {listings.map((item) => {
+                            const rawImg = item.image || item.imageUrl || item.image_url;
+                            const resolvedImg = resolveImageUrl(rawImg);
+                            const isBroken = brokenImages[item.id] || !resolvedImg;
+
+                            return (
+                                <div className="listing-row" key={item.id}>
+                                    <div className="listing-thumb-wrap">
+                                        {isBroken ? (
+                                            <div className="listing-thumb-placeholder">
+                                                <BookOpen size={24} />
+                                            </div>
+                                        ) : (
+                                            <img
+                                                className="listing-thumb"
+                                                src={resolvedImg}
+                                                alt={item.title}
+                                                onError={() =>
+                                                    setBrokenImages((prev) => ({ ...prev, [item.id]: true }))
+                                                }
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="listing-main">
+                                        <div className="listing-title-row">
+                                            <h3>{item.title}</h3>
+                                            {item.isExchange && <span className="swap-chip">SWAP</span>}
+                                        </div>
+                                        <p className="listing-author">by {item.author || "Unknown Author"}</p>
+                                        <div className="listing-tags">
+                                            {item.condition && <span className="tag">{item.condition}</span>}
+                                            {item.category && <span className="tag">{item.category}</span>}
+                                            {item.universityName && <span className="tag strong">{item.universityName}</span>}
+                                            {item.facultyName && <span className="tag strong">{item.facultyName}</span>}
+                                        </div>
+                                        <div className="listing-meta">
+                                            <span className="meta-item">
+                                                <Eye size={14} /> {item.viewsCount ?? item.views ?? 0} views
+                                            </span>
+                                            <span className="meta-item">
+                                                <Heart size={14} /> {item.savesCount ?? item.saves ?? 0} saves
+                                            </span>
+                                            <span className="meta-item">
+                                                <Clock size={14} /> {timeAgo(item.postedAt || item.createdAt)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="listing-price-col">
+                                        {item.isExchange ? (
+                                            <span className="price exchange">Exchange</span>
+                                        ) : (
+                                            <span className="price">{Number(item.price || 0).toFixed(0)} JD</span>
+                                        )}
+                                        <span className={`status-pill ${item.status || "active"}`}>
+                                            {item.status === "sold" ? "Sold" : "Active"}
+                                        </span>
+                                    </div>
+
+                                    <div className="listing-actions">
+                                        <button className="action-btn edit" onClick={() => handleEdit(item.id)}>
+                                            <PenLine size={14} />
+                                            <span>Edit</span>
+                                        </button>
+                                        {(item.status === "active" || !item.status) && (
+                                            <button className="action-btn sold" onClick={() => handleMarkAsSold(item.id)}>
+                                                <CheckCircle2 size={14} />
+                                                <span>Mark as Sold</span>
+                                            </button>
+                                        )}
+                                        <button className="action-btn delete" onClick={() => handleDelete(item.id)}>
+                                            <Trash2 size={14} />
+                                            <span>Delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
+
+            {/* Add Book Modal */}
+            <AddBookModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onBookAdded={handleBookAdded}
+            />
         </div>
     );
 }
