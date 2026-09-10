@@ -80,7 +80,7 @@ export default function ListingDetails() {
         );
     }
 
-    const displayImage = book.image || defaultCover;
+    const displayImage = book.coverImage || book.cover_image || book.image || book.imagesUrl?.[0] || book.images_url?.[0] || defaultCover;
     const isExchange = book.listing_type === "for_sale_and_exchange" || book.is_exchange;
 
     const timeAgo = (dateString) => {
@@ -93,6 +93,11 @@ export default function ListingDetails() {
         return `${diff} days ago`;
     };
 
+    const handleImageError = (e) => {
+        e.target.onerror = null;
+        e.target.src = defaultCover;
+    };
+
     return (
         <div className="details-wrapper">
             <PaperBackground />
@@ -101,18 +106,28 @@ export default function ListingDetails() {
             </div>
 
             <main style={{ position: "relative", zIndex: 1 }}>
-                <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%", paddingLeft: "12px" }}>
-                    <Link to="/home" className="back-link">← Back to Listings</Link>
+                <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%", marginBottom: "16px" }}>
+                    <Link to="/home" className="back-link">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                        <span className="back-link-text">Back to Listings</span>
+                    </Link>
                 </div>
 
                 <div className="listing-details-container">
                     {/* Left Column - Images */}
                     <div className="listing-left">
-                        <img src={displayImage} alt={book.title} className="listing-main-image" />
+                        <img 
+                            src={displayImage} 
+                            alt={book.title} 
+                            className="listing-main-image" 
+                            onError={handleImageError} 
+                        />
                         <div className="listing-thumbnails">
-                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" />
-                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" style={{ opacity: 0.7 }} />
-                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" style={{ opacity: 0.7 }} />
+                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" onError={handleImageError} />
+                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" style={{opacity: 0.7}} onError={handleImageError} />
+                            <img src={displayImage} alt="thumbnail" className="listing-thumbnail" style={{opacity: 0.7}} onError={handleImageError} />
                         </div>
                     </div>
 

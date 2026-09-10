@@ -291,19 +291,30 @@
 .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: #475569;
+    gap: 6px;
+    color: #334155;
+    background-color: #ffffff;
+    padding: 10px 18px 10px 14px;
+    border-radius: 12px;
     text-decoration: none;
     font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 16px;
+    font-size: 15px;
     position: relative;
     z-index: 10;
-    transition: color 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.back-link-text {
+    transform: translateY(-1px);
 }
 
 .back-link:hover {
-    color: #1e293b;
+    color: #0f172a;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
 }
 
 .details-wrapper {
