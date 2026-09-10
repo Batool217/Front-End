@@ -45,7 +45,7 @@ function timeAgo(dateString) {
 
 export default function MyListings() {
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { token } = useAuth(); // We only need the token now, not the user object!
 
     const [activeTab, setActiveTab] = useState("active"); // "active" | "sold"
     const [listings, setListings] = useState([]);
@@ -63,9 +63,9 @@ export default function MyListings() {
     );
 
     const fetchCounts = useCallback(async () => {
-        if (!resolvedUserId) return;
+        if (!token) return;
         try {
-            const res = await fetch(`${API_BASE}/users/${resolvedUserId}/listings/counts`, {
+            const res = await fetch(`${API_BASE}/listings/my/counts`, {
                 headers: authHeaders(),
             });
             if (res.ok) {
@@ -78,18 +78,15 @@ export default function MyListings() {
         } catch (err) {
             console.error("Failed to load counts:", err);
         }
-    }, [resolvedUserId, authHeaders]);
+    }, [token, authHeaders]);
 
     const fetchListings = useCallback(async () => {
-        if (!resolvedUserId) {
-            setLoading(false);
-            return;
-        }
+        if (!token) return;
         setLoading(true);
         setError("");
         try {
             const res = await fetch(
-                `${API_BASE}/users/${resolvedUserId}/listings?status=${activeTab}`,
+                `${API_BASE}/listings/my?status=${activeTab}`,
                 { headers: authHeaders() }
             );
             if (!res.ok) throw new Error("Failed to load your listings.");
@@ -100,7 +97,7 @@ export default function MyListings() {
         } finally {
             setLoading(false);
         }
-    }, [resolvedUserId, activeTab, authHeaders]);
+    }, [token, activeTab, authHeaders]);
 
     useEffect(() => {
         void fetchCounts();
@@ -180,32 +177,67 @@ export default function MyListings() {
                     </button>
                 </div>
 
-                {loading && (
-                    <div className="listings-loading-state">
-                        <Loader2 size={30} className="spinner-icon" />
-                        <p>Loading your books...</p>
-                    </div>
-                )}
+            {loading && <p className="listings-status">Loading...</p>}
+            {error && <p className="listings-status error">{error}</p>}
 
-                {error && <p className="listings-status error">{error}</p>}
+            {!loading && !error && listings.length === 0 && (
+                <p className="listings-status">
+                    {activeTab === "active"
+                        ? "You don't have any active listings yet."
+                        : "You haven't sold anything yet."}
+                </p>
+            )}
 
-                {!loading && !error && listings.length === 0 && (
-                    <div className="listings-empty-box">
-                        <BookOpen size={42} className="empty-icon" />
-                        <h3>{activeTab === "active" ? "No active listings" : "No sold items yet"}</h3>
-                        <p>
-                            {activeTab === "active"
-                                ? "You don't have any books listed for sale or swap right now."
-                                : "Books you mark as sold will appear here."}
-                        </p>
-                        {activeTab === "active" && (
-                            <button
-                                className="post-new-btn"
-                                style={{ marginTop: "14px" }}
-                                onClick={() => setIsAddModalOpen(true)}
-                            >
-                                <Plus size={16} />
-                                <span>Post Your First Book</span>
+            <div className="listings-list">
+                {listings.map((item) => (
+                    <div className="listing-row" key={item.id}>
+                        <img
+                            className="listing-thumb"
+                            src={item.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&q=80"}
+                            alt={item.title}
+                        />
+
+                        <div className="listing-main">
+                            <div className="listing-title-row">
+                                <h3>{item.title}</h3>
+                                {item.isExchange && <span className="swap-chip">SWAP</span>}
+                            </div>
+                            <p className="listing-author">by {item.author}</p>
+                            <div className="listing-tags">
+                                {item.condition && <span className="tag">{item.condition}</span>}
+                                {item.category && <span className="tag">{item.category}</span>}
+                                {item.universityName && <span className="tag strong">{item.universityName}</span>}
+                                {item.facultyName && <span className="tag strong">{item.facultyName}</span>}
+                            </div>
+                            <div className="listing-meta">
+                                <span>👁 {item.viewsCount} views</span>
+                                <span>❤ {item.savesCount} saves</span>
+                                <span>🕒 {timeAgo(item.postedAt)}</span>
+                            </div>
+                        </div>
+
+                        <div className="listing-price-col">
+                            {item.isExchange ? (
+                                <span className="price exchange">Exchange</span>
+                            ) : (
+                                <span className="price">{Number(item.price).toFixed(0)} JD</span>
+                            )}
+                            <span className={`status-pill ${item.status}`}>
+                                {item.status === "active" ? "Active" : "Sold"}
+                            </span>
+                        </div>
+
+                        <div className="listing-actions">
+                            <button className="action-btn edit" onClick={() => handleEdit(item.id)}>
+                                ✏️ Edit
+                            </button>
+                            {item.status === "active" && (
+                                <button className="action-btn sold" onClick={() => handleMarkAsSold(item.id)}>
+                                    ✅ Mark as Sold
+                                </button>
+                            )}
+                            <button className="action-btn delete" onClick={() => handleDelete(item.id)}>
+                                🗑️ Delete
                             </button>
                         )}
                     </div>

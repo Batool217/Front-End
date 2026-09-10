@@ -1,12 +1,20 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function ReportListingModal({ isOpen, onClose, book }) {
+    const [reason, setReason] = useState("");
+    const [details, setDetails] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Prevent background scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
+            // Reset state on close
+            setReason("");
+            setDetails("");
+            setIsSubmitting(false);
         }
         return () => {
             document.body.style.overflow = "unset";
@@ -14,6 +22,21 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
     }, [isOpen]);
 
     if (!isOpen || !book) return null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!reason) return;
+        
+        setIsSubmitting(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsSubmitting(false);
+            alert("Report submitted successfully. Thank you for your feedback.");
+            onClose();
+        }, 1000);
+    };
+
+    const isFormValid = reason !== "";
 
     return (
         <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
@@ -112,7 +135,8 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                 </div>
 
                 {/* Form Body */}
-                <div
+                <form
+                    onSubmit={handleSubmit}
                     style={{
                         padding: "0 24px 24px 24px",
                         display: "flex",
@@ -120,7 +144,7 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                         gap: "18px",
                     }}
                 >
-                    {/* Listing Card (Task 1) */}
+                    {/* Listing Card */}
                     <div
                         style={{
                             display: "flex",
@@ -166,7 +190,7 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                         </div>
                     </div>
 
-                    {/* Reason for reporting (Task 2 Stub) */}
+                    {/* Reason for reporting */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label
                             style={{
@@ -175,29 +199,35 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                                 color: "#334155",
                             }}
                         >
-                            Reason for reporting
+                            Reason for reporting <span style={{ color: "#ef4444" }}>*</span>
                         </label>
-                        <div
+                        <select
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            required
                             style={{
                                 padding: "10px 14px",
                                 borderRadius: "8px",
                                 border: "1px solid #cbd5e1",
                                 fontSize: "14px",
-                                color: "#94a3b8",
+                                color: reason ? "#0f172a" : "#94a3b8",
                                 backgroundColor: "#ffffff",
                                 cursor: "pointer",
-                                userSelect: "none",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
+                                outline: "none",
+                                width: "100%",
+                                appearance: "none",
                             }}
                         >
-                            <span>Select a reason...</span>
-                            <span style={{ fontSize: "10px", color: "#64748b" }}>▼</span>
-                        </div>
+                            <option value="" disabled>Select a reason...</option>
+                            <option value="spam">Spam or misleading</option>
+                            <option value="inappropriate">Inappropriate content</option>
+                            <option value="scam">Scam or fraud</option>
+                            <option value="unavailable">Item no longer available</option>
+                            <option value="other">Other</option>
+                        </select>
                     </div>
 
-                    {/* Additional details (Task 3 Stub) */}
+                    {/* Additional details */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label
                             style={{
@@ -209,23 +239,26 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                             Additional details
                         </label>
                         <textarea
+                            value={details}
+                            onChange={(e) => setDetails(e.target.value)}
                             rows={3}
-                            disabled
                             placeholder="Please describe the issue in detail to help us investigate..."
                             style={{
                                 padding: "10px 14px",
                                 borderRadius: "8px",
-                                border: "1px solid #e2e8f0",
+                                border: "1px solid #cbd5e1",
                                 fontSize: "14px",
                                 outline: "none",
                                 resize: "none",
-                                backgroundColor: "#f8fafc",
-                                color: "#94a3b8",
+                                backgroundColor: "#ffffff",
+                                color: "#0f172a",
+                                width: "100%",
+                                boxSizing: "border-box"
                             }}
                         />
                     </div>
 
-                    {/* Note Banner (Task 3 Stub) */}
+                    {/* Note Banner */}
                     <div
                         style={{
                             backgroundColor: "#fffbeb",
@@ -240,7 +273,7 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                         <strong>Note:</strong> False reports may affect your account standing. Reports are reviewed within 24 hours.
                     </div>
 
-                    {/* Actions (Task 4 Stub) */}
+                    {/* Actions */}
                     <div
                         style={{
                             display: "flex",
@@ -256,7 +289,7 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                                 padding: "11px",
                                 borderRadius: "8px",
                                 border: "1px solid #cbd5e1",
-                                backgroundColor: "#f8fafc",
+                                backgroundColor: "#ffffff",
                                 color: "#475569",
                                 fontWeight: "600",
                                 fontSize: "14px",
@@ -264,32 +297,30 @@ export default function ReportListingModal({ isOpen, onClose, book }) {
                                 transition: "all 0.15s ease",
                                 outline: "none",
                             }}
-                            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f1f5f9")}
-                            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
                         >
                             Cancel
                         </button>
                         <button
-                            type="button"
-                            disabled
+                            type="submit"
+                            disabled={!isFormValid || isSubmitting}
                             style={{
                                 flex: 1.2,
                                 padding: "11px",
                                 borderRadius: "8px",
                                 border: "none",
-                                backgroundColor: "#cbd5e1",
+                                backgroundColor: !isFormValid || isSubmitting ? "#cbd5e1" : "#f97316",
                                 color: "#ffffff",
                                 fontWeight: "600",
                                 fontSize: "14px",
-                                cursor: "not-allowed",
+                                cursor: !isFormValid || isSubmitting ? "not-allowed" : "pointer",
                                 transition: "all 0.15s ease",
                                 outline: "none",
                             }}
                         >
-                            Submit Report
+                            {isSubmitting ? "Submitting..." : "Submit Report"}
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );

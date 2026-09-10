@@ -30,37 +30,42 @@ export default function Profile() {
     const [brokenImages, setBrokenImages] = useState({});
     const [avatarFailed, setAvatarFailed] = useState(false);
 
-    const resolvedUserId = user?.user_id || user?.userId || user?.id;
-
     const loadProfileData = useCallback(async () => {
-        if (!resolvedUserId) {
-            setLoading(false);
-            return;
-        }
+        // Wait until token is available
+        if (!token) return;
 
+        setLoading(true);
         const headers = { Authorization: `Bearer ${token}` };
+        const resolvedUserId = user?.user_id || user?.userId || user?.id;
 
         try {
-            const [profileRes, listingsRes] = await Promise.all([
-                fetch(`${API_BASE}/users/${resolvedUserId}/profile`, { headers }),
-                fetch(`${API_BASE}/users/${resolvedUserId}/listings?status=active&limit=3`, { headers }),
-            ]);
+            // Fetch listings using /my (does not require user ID in URL)
+            const listingsPromise = fetch(`${API_BASE}/listings/my?status=active&limit=3`, { headers });
+            
+            // Fetch profile data if user ID is resolved
+            const profilePromise = resolvedUserId 
+                ? fetch(`${API_BASE}/users/${resolvedUserId}/profile`, { headers })
+                : Promise.resolve(null);
 
-            if (profileRes.ok) {
-                const profileData = await profileRes.json();
-                setProfile(profileData);
-            }
+            const [listingsRes, profileRes] = await Promise.all([listingsPromise, profilePromise]);
 
             if (listingsRes.ok) {
                 const listingsData = await listingsRes.json();
                 setListings(Array.isArray(listingsData) ? listingsData : []);
+            } else {
+                console.error("Failed to fetch listings:", listingsRes.status);
+            }
+
+            if (profileRes && profileRes.ok) {
+                const profileData = await profileRes.json();
+                setProfile(profileData);
             }
         } catch (err) {
             console.error("Failed to load profile data:", err);
         } finally {
             setLoading(false);
         }
-    }, [resolvedUserId, token]);
+    }, [user, token]);
 
     useEffect(() => {
         let isMounted = true;
