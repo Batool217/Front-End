@@ -1,78 +1,83 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { User, Camera } from "lucide-react";
+import Navbar from "../components/Navbar";
+import { User, Camera, Loader2, ArrowLeft } from "lucide-react";
 import "../styles/css/editprofile.css";
 
 const API_BASE = "http://localhost:8080/api/v1";
+const BACKEND_URL = "http://localhost:8080";
+
+const resolveImageUrl = (path) => {
+    if (!path || typeof path !== "string" || path.trim() === "" || path === "null") return null;
+    if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+        return path;
+    }
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${BACKEND_URL}${cleanPath}`;
+};
 
 export default function EditProfile() {
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { user, token, updateUser } = useAuth();
     const fileInputRef = useRef(null);
 
-    // Resolve user ID across different JWT/Context schemas
-    const currentUserId = user?.userId || user?.id || user?.sub;
+    const currentUserId = user?.user_id || user?.userId || user?.id;
 
-    // 1. Pre-fill state immediately with signup/login data already in user context
     const [form, setForm] = useState({
-        fullName: user?.fullName || user?.full_name || user?.name || "",
-        phoneNumber: user?.phoneNumber || user?.phone_number || user?.phone || "",
+        fullName: user?.full_name || user?.fullName || user?.name || "",
+        phoneNumber: user?.phone_number || user?.phoneNumber || user?.phone || "",
         email: user?.email || "",
-        bio: user?.bio || "",
     });
+
     const [profileImage, setProfileImage] = useState(
-        user?.profileImage || user?.profile_image || user?.avatarUrl || ""
+        user?.profile_image || user?.profileImage || ""
     );
+    const [imageError, setImageError] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [loadingInitial, setLoadingInitial] = useState(true);
     const [error, setError] = useState("");
 
-    // 2. Sync if user context loads slightly after initial render
     useEffect(() => {
-        if (user) {
-            setForm((prev) => ({
-                fullName: prev.fullName || user.fullName || user.full_name || user.name || "",
-                phoneNumber: prev.phoneNumber || user.phoneNumber || user.phone_number || user.phone || "",
-                email: prev.email || user.email || "",
-                bio: prev.bio || user.bio || "",
-            }));
-            if (!profileImage && (user.profileImage || user.profile_image || user.avatarUrl)) {
-                setProfileImage(user.profileImage || user.profile_image || user.avatarUrl);
-            }
+        if (!currentUserId) {
+            setLoadingInitial(false);
+            return;
         }
-    }, [user]);
 
-    // 3. Fetch latest database record
-    useEffect(() => {
-        if (!currentUserId) return;
+        let isMounted = true;
 
         fetch(`${API_BASE}/users/${currentUserId}/profile`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
-                if (!res.ok) throw new Error("Could not fetch profile");
+                if (!res.ok) throw new Error("Could not fetch profile details.");
                 return res.json();
             })
             .then((data) => {
+                if (!isMounted) return;
                 setForm({
-                    fullName: data.fullName || data.full_name || data.name || user?.fullName || user?.name || "",
-                    phoneNumber: data.phoneNumber || data.phone_number || data.phone || user?.phoneNumber || user?.phone || "",
+                    fullName: data.full_name || data.fullName || data.name || "",
+                    phoneNumber: data.phone_number || data.phoneNumber || data.phone || "",
                     email: data.email || user?.email || "",
-                    bio: data.bio || "",
                 });
-                setProfileImage(
-                    data.profileImage ||
-                    data.profile_image ||
-                    data.avatarUrl ||
-                    data.avatar_url ||
-                    ""
-                );
+                const img = data.profile_image || data.profileImage || "";
+                if (img) {
+                    setProfileImage(img);
+                    setImageError(false);
+                }
             })
             .catch((err) => {
                 console.error("Fetch profile error:", err);
+            })
+            .finally(() => {
+                if (isMounted) setLoadingInitial(false);
             });
-    }, [currentUserId, token]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [currentUserId, token, user?.email]);
 
     const handleChange = (field, value) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -89,16 +94,21 @@ export default function EditProfile() {
         try {
             const formData = new FormData();
             formData.append("file", file);
+
             const res = await fetch(`${API_BASE}/upload`, {
                 method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
                 body: formData,
             });
+
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Upload failed.");
-            setProfileImage(data.url || data.imageUrl || data.fileUrl);
+
+            const uploadedUrl = data.url || data.imageUrl || data.fileUrl;
+            setProfileImage(uploadedUrl);
+            setImageError(false);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || "Failed to upload photo.");
         } finally {
             setUploading(false);
         }
@@ -108,8 +118,20 @@ export default function EditProfile() {
 
     const handleSave = async (e) => {
         e.preventDefault();
+        if (!currentUserId) {
+            setError("User session not found. Please log in again.");
+            return;
+        }
+
         setSaving(true);
         setError("");
+
+        const payload = {
+            full_name: form.fullName.trim(),
+            phone_number: form.phoneNumber.trim(),
+            profile_image: profileImage || null,
+        };
+
         try {
             const res = await fetch(`${API_BASE}/users/${currentUserId}/profile`, {
                 method: "PUT",
@@ -117,18 +139,28 @@ export default function EditProfile() {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    fullName: form.fullName,
-                    full_name: form.fullName,
-                    phoneNumber: form.phoneNumber,
-                    phone_number: form.phoneNumber,
-                    email: form.email,
-                    bio: form.bio,
-                    profileImage: profileImage,
-                    profile_image: profileImage,
-                }),
+                body: JSON.stringify(payload),
             });
-            if (!res.ok) throw new Error("Failed to save changes.");
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || data.message || "Failed to save changes.");
+            }
+
+            const updatedData = await res.json().catch(() => ({}));
+
+            if (updateUser) {
+                updateUser({
+                    ...user,
+                    ...updatedData,
+                    name: form.fullName.trim(),
+                    full_name: form.fullName.trim(),
+                    phone_number: form.phoneNumber.trim(),
+                    profile_image: profileImage || null,
+                    profileImage: profileImage || null,
+                });
+            }
+
             navigate("/profile");
         } catch (err) {
             setError(err.message);
@@ -137,94 +169,125 @@ export default function EditProfile() {
         }
     };
 
+    const resolvedAvatarUrl = resolveImageUrl(profileImage);
+
     return (
-        <div className="edit-profile-page">
-            <h1>Edit Profile</h1>
-            <p className="edit-profile-subtitle">Update your personal information and profile photo.</p>
+        <div className="edit-profile-wrapper">
+            <Navbar />
 
-            <form className="edit-profile-card" onSubmit={handleSave}>
-                <div className="edit-avatar-row">
-                    <div className="edit-avatar-wrap" onClick={handlePhotoClick} style={{ cursor: "pointer", position: "relative" }}>
-                        {profileImage ? (
-                            <img src={profileImage} alt="avatar" />
-                        ) : (
-                            <div className="edit-avatar placeholder">
-                                <User size={40} color="#f97316" />
+            <div className="edit-profile-container">
+                <button type="button" className="back-link-btn" onClick={handleCancel}>
+                    <ArrowLeft size={16} />
+                    <span>Back to Profile</span>
+                </button>
+
+                <div className="edit-profile-header">
+                    <h1>Edit Profile</h1>
+                    <p>Update your personal information and profile photo.</p>
+                </div>
+
+                {loadingInitial ? (
+                    <div className="edit-profile-loading">
+                        <Loader2 size={32} className="spinner-icon" />
+                        <p>Loading profile details...</p>
+                    </div>
+                ) : (
+                    <form className="edit-profile-card" onSubmit={handleSave}>
+                        <div className="edit-avatar-row">
+                            <div className="edit-avatar-wrap" onClick={handlePhotoClick}>
+                                {resolvedAvatarUrl && !imageError ? (
+                                    <img
+                                        src={resolvedAvatarUrl}
+                                        alt="avatar"
+                                        className="edit-avatar-img"
+                                        onError={() => setImageError(true)}
+                                    />
+                                ) : (
+                                    <div className="edit-avatar-placeholder">
+                                        <User size={38} className="edit-placeholder-icon" />
+                                    </div>
+                                )}
+                                <div className="edit-avatar-badge">
+                                    {uploading ? (
+                                        <Loader2 size={13} className="spinner-icon" />
+                                    ) : (
+                                        <Camera size={14} />
+                                    )}
+                                </div>
                             </div>
-                        )}
-                        <span className="edit-avatar-badge">
-                            <Camera size={14} />
-                        </span>
-                    </div>
-                    <div>
-                        <h3>{form.fullName || user?.fullName || user?.name || "Your name"}</h3>
-                        <span className="change-photo-link" onClick={handlePhotoClick}>
-                            {uploading ? "Uploading..." : "Change profile photo"}
-                        </span>
-                        <input
-                            type="file"
-                            accept="image/png, image/jpeg, image/webp"
-                            ref={fileInputRef}
-                            style={{ display: "none" }}
-                            onChange={handlePhotoChange}
-                        />
-                    </div>
-                </div>
 
-                <hr />
+                            <div className="edit-avatar-info">
+                                <h3>{form.fullName || "Your name"}</h3>
+                                <button
+                                    type="button"
+                                    className="change-photo-btn"
+                                    onClick={handlePhotoClick}
+                                    disabled={uploading}
+                                >
+                                    {uploading ? "Uploading photo..." : "Change profile photo"}
+                                </button>
+                                <input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/webp"
+                                    ref={fileInputRef}
+                                    style={{ display: "none" }}
+                                    onChange={handlePhotoChange}
+                                />
+                            </div>
+                        </div>
 
-                <div className="edit-form-grid">
-                    <div className="form-field">
-                        <label>Full Name</label>
-                        <input
-                            type="text"
-                            value={form.fullName || ""}
-                            onChange={(e) => handleChange("fullName", e.target.value)}
-                            placeholder="Enter your full name"
-                        />
-                    </div>
-                    <div className="form-field">
-                        <label>Phone Number</label>
-                        <input
-                            type="text"
-                            value={form.phoneNumber || ""}
-                            onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                            placeholder="Enter your phone number"
-                        />
-                    </div>
-                </div>
+                        <div className="edit-form-grid">
+                            <div className="form-field">
+                                <label>Full Name *</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={form.fullName}
+                                    onChange={(e) => handleChange("fullName", e.target.value)}
+                                    placeholder="Enter your full name"
+                                />
+                            </div>
 
-                <div className="form-field">
-                    <label>Email Address</label>
-                    <input
-                        type="email"
-                        value={form.email || ""}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        placeholder="Enter your email address"
-                    />
-                </div>
+                            <div className="form-field">
+                                <label>Phone Number *</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={form.phoneNumber}
+                                    onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                                    placeholder="Enter your phone number"
+                                />
+                            </div>
+                        </div>
 
-                <div className="form-field">
-                    <label>Bio (optional)</label>
-                    <textarea
-                        rows={3}
-                        value={form.bio || ""}
-                        onChange={(e) => handleChange("bio", e.target.value)}
-                        placeholder="Tell others a bit about yourself..."
-                    />
-                </div>
+                        <div className="form-field">
+                            <label>Email Address</label>
+                            <input
+                                type="email"
+                                disabled
+                                value={form.email}
+                                className="input-disabled"
+                            />
+                            <span className="field-hint">Email address cannot be modified.</span>
+                        </div>
 
-                {error && <p className="edit-profile-error">{error}</p>}
+                        {error && <p className="edit-profile-error">{error}</p>}
 
-                <div className="edit-form-actions">
-                    <button type="button" className="btn-cancel" onClick={handleCancel}>
-                        Cancel
-                    </button>
-                    <button type="submit" className="btn-save" disabled={saving}>
-                        {saving ? "Saving..." : "Save Changes"}
-                    </button>
-                </div>
-            </form>
+                        <div className="edit-form-actions">
+                            <button type="button" className="btn-cancel" onClick={handleCancel}>
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn-save"
+                                disabled={saving || uploading}
+                            >
+                                {saving ? "Saving Changes..." : "Save Changes"}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 }

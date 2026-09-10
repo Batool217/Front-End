@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import MyListings from "./pages/MyListings";
 import EditProfile from "./pages/EditProfile";
+import EditListing from "./pages/EditListing";
 import PrivateRoute from "./components/PrivateRoute";
 
 import "./styles/css/auth.css";
@@ -35,6 +36,7 @@ function AppRoutes() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/mylistings" element={<MyListings />} />
                 <Route path="/editprofile" element={<EditProfile />} />
+                <Route path="/edit-listing/:id" element={<EditListing />} />
             </Route>
 
             {/* Fallback */}
@@ -46,7 +48,7 @@ function AppRoutes() {
     );
 }
 
-function App() {
+export default function App() {
     return (
         <AuthProvider>
             <BrowserRouter>
@@ -55,5 +57,3 @@ function App() {
         </AuthProvider>
     );
 }
-
-export default App;
