@@ -183,7 +183,12 @@ export default function ListingDetails() {
                                     </div>
                                 </div>
                             </div>
-                            <button className="view-profile-btn">View Profile</button>
+                            <button 
+                                className="view-profile-btn"
+                                onClick={() => navigate(`/user/${book.publisher_id}`)}
+                            >
+                                View Profile
+                            </button>
                         </div>
 
                         <div className="listing-description-section">

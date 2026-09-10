@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import Register from "./pages/Register";
@@ -9,6 +11,7 @@ import MyListings from "./pages/MyListings";
 import EditProfile from "./pages/EditProfile";
 import EditListing from "./pages/EditListing";
 import ListingDetails from "./pages/ListingDetails";
+import UserProfile from "./pages/UserProfile";
 import PrivateRoute from "./components/PrivateRoute";
 
 import "./styles/css/auth.css";
@@ -33,6 +36,7 @@ function AppRoutes() {
 
             <Route path="/home" element={<Home />} />
             <Route path="/listing/:id" element={<ListingDetails />} />
+            <Route path="/user/:id" element={<UserProfile />} />
 
             <Route element={<PrivateRoute />}>
                 <Route path="/profile" element={<Profile />} />
@@ -50,7 +54,16 @@ function AppRoutes() {
     );
 }
 
+import "./i18n";
+
 function App() {
+    const { i18n } = useTranslation();
+
+    useEffect(() => {
+        document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = i18n.language;
+    }, [i18n.language]);
+
     return (
         <AuthProvider>
             <BrowserRouter>

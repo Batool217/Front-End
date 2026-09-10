@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import BookCard from "./BookCard";
 import "../styles/css/listings.css";
 
 function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -69,18 +71,18 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
         <section className="recent-listings">
             <div className="listings-header">
                 <div className="listings-title">
-                    <h2>Recent Listings</h2>
-                    <span className="results-badge">{books.length} results</span>
+                    <h2>{t("home.recentListings")}</h2>
+                    <span className="results-badge">{books.length} {t("home.results")}</span>
                 </div>
 
                 <a href="#" className="view-all">
-                    View all →
+                    {t("home.viewAll")}
                 </a>
             </div>
 
             {loading && (
                 <div style={{ padding: "40px 0", textAlign: "center", color: "#64748b" }}>
-                    Loading available books...
+                    {t("home.loading")}
                 </div>
             )}
 
@@ -92,7 +94,7 @@ function RecentListings({ searchQuery = "", filters = {}, refreshTrigger = 0 }) 
 
             {!loading && !error && books.length === 0 && (
                 <div style={{ padding: "40px 0", textAlign: "center", color: "#64748b" }}>
-                    No books found matching your search criteria.
+                    {t("home.noBooks")}
                 </div>
             )}
 

@@ -1,0 +1,54 @@
+{
+  "navbar": {
+    "searchPlaceholder": "Search books, authors, or ISBN...",
+    "postNewBook": "Post New Book",
+    "browse": "Browse",
+    "login": "Login",
+    "register": "Register",
+    "myProfile": "My Profile",
+    "myListings": "My Listings",
+    "editProfile": "Edit Profile",
+    "logout": "Logout"
+  },
+  "home": {
+    "heroTagline": "JORDAN'S COMMUNITY BOOK MARKETPLACE",
+    "heroTitle": "Buy, sell, and exchange<br />books across Jordan",
+    "heroSubtitle": "Discover thousands of books, novels, and educational resources from readers across the Kingdom",
+    "addBook": "Add a Book",
+    "recentListings": "Recent Listings",
+    "results": "results",
+    "viewAll": "View all →",
+    "loading": "Loading available books...",
+    "noBooks": "No books found matching your search criteria."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "active": "Active",
+    "sold": "Sold"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your Waraq account",
+    "signUp": "Sign Up",
+    "logIn": "Log In",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "ahmad@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Your password",
+    "loggingIn": "Logging in...",
+    "createAccount": "Create an account",
+    "registerSubtitle": "Join Waraq and start buying and selling books",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Ahmad Mohammad",
+    "university": "University",
+    "selectUniversity": "Select your university",
+    "phoneNumber": "Phone Number",
+    "phonePlaceholder": "079 123 4567",
+    "confirmPassword": "Confirm Password",
+    "creatingAccount": "Creating account..."
+  }
+}

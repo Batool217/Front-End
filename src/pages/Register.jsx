@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AuthVisualPanel from "../components/AuthVisualPanel";
 import PaperBackground from "../components/PaperBackground";
 
 function Register() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -149,10 +151,10 @@ function Register() {
       <div className="auth-form-panel">
         <PaperBackground />
         <div className="auth-container">
-          <h1>Create your account</h1>
+          <h1>{t("auth.createAccount")}</h1>
 
           <p className="subtitle">
-            Join thousands of people buying and selling books
+            {t("auth.registerSubtitle")}
           </p>
 
           <div className="auth-tabs">
@@ -160,14 +162,14 @@ function Register() {
               className="tab active"
               onClick={() => navigate("/register")}
             >
-              Sign Up
+              {t("auth.signUp")}
             </button>
 
             <button
               className="tab"
               onClick={() => navigate("/login")}
             >
-              Log In
+              {t("auth.logIn")}
             </button>
           </div>
 
@@ -180,11 +182,11 @@ function Register() {
           <form onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
-                <label>Full Name</label>
+                <label>{t("auth.fullName")}</label>
                 <input
                   type="text"
                   name="fullName"
-                  placeholder="Enter your full name"
+                  placeholder={t("auth.fullNamePlaceholder")}
                   value={form.fullName}
                   onChange={handleChange}
                 />
@@ -194,11 +196,11 @@ function Register() {
               </div>
 
               <div className="form-group">
-                <label>Phone Number</label>
+                <label>{t("auth.phoneNumber")}</label>
                 <input
                   type="text"
                   name="phoneNumber"
-                  placeholder="+962791234567"
+                  placeholder={t("auth.phonePlaceholder")}
                   value={form.phoneNumber}
                   onChange={handleChange}
                 />
@@ -209,11 +211,11 @@ function Register() {
             </div>
 
             <div className="form-group">
-              <label>Email Address</label>
+              <label>{t("auth.emailLabel")}</label>
               <input
                 type="email"
                 name="email"
-                placeholder="name@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={form.email}
                 onChange={handleChange}
               />
@@ -223,11 +225,11 @@ function Register() {
             </div>
 
             <div className="form-group">
-              <label>Password</label>
+              <label>{t("auth.passwordLabel")}</label>
               <input
                 type="password"
                 name="password"
-                placeholder="At least 8 chars (A-z, 0-9, !@#)"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={form.password}
                 onChange={handleChange}
               />
@@ -237,11 +239,11 @@ function Register() {
             </div>
 
             <div className="form-group">
-              <label>Confirm Password</label>
+              <label>{t("auth.confirmPassword")}</label>
               <input
                 type="password"
                 name="confirmPassword"
-                placeholder="Re-enter your password"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={form.confirmPassword}
                 onChange={handleChange}
               />
@@ -255,7 +257,7 @@ function Register() {
               type="submit"
               disabled={loading}
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? t("auth.creatingAccount") : t("auth.createAccount")}
             </button>
             
           </form>

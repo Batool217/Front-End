@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import '../styles/css/hero.css';
 
 export default function HeroBanner({ onAddBook }) {
+    const { t } = useTranslation();
+
     return (
         <div className="hero-banner">
             {/* Ambient Background Circles */}
@@ -9,14 +12,12 @@ export default function HeroBanner({ onAddBook }) {
 
             {/* Left Content */}
             <div className="hero-content">
-                <span className="hero-tagline">JORDAN'S COMMUNITY BOOK MARKETPLACE</span>
-                <h1 className="hero-title">
-                    Buy, sell, and exchange<br />books across Jordan
-                </h1>
-                <p className="hero-subtitle">Discover thousands of books, novels, and educational resources from readers across the Kingdom</p>
+                <span className="hero-tagline">{t("home.heroTagline")}</span>
+                <h1 className="hero-title" dangerouslySetInnerHTML={{ __html: t("home.heroTitle") }} />
+                <p className="hero-subtitle">{t("home.heroSubtitle")}</p>
 
                 <button className="add-book-btn" onClick={onAddBook} type="button">
-                    + Add Book
+                    + {t("home.addBook")}
                 </button>
             </div>
 
