@@ -23,7 +23,7 @@ function timeAgo(dateString) {
 
 export default function MyListings() {
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+    const { token } = useAuth(); // We only need the token now, not the user object!
 
     const [activeTab, setActiveTab] = useState("active"); // "active" | "sold"
     const [listings, setListings] = useState([]);
@@ -37,24 +37,24 @@ export default function MyListings() {
     );
 
     const fetchCounts = useCallback(async () => {
-        if (!user?.userId) return;
+        if (!token) return;
         try {
-            const res = await fetch(`${API_BASE}/users/${user.userId}/listings/counts`, {
+            const res = await fetch(`${API_BASE}/listings/my/counts`, {
                 headers: authHeaders(),
             });
             if (res.ok) setCounts(await res.json());
         } catch (err) {
             console.error("Failed to load counts:", err);
         }
-    }, [user, authHeaders]);
+    }, [token, authHeaders]);
 
     const fetchListings = useCallback(async () => {
-        if (!user?.userId) return;
+        if (!token) return;
         setLoading(true);
         setError("");
         try {
             const res = await fetch(
-                `${API_BASE}/users/${user.userId}/listings?status=${activeTab}`,
+                `${API_BASE}/listings/my?status=${activeTab}`,
                 { headers: authHeaders() }
             );
             if (!res.ok) throw new Error("Failed to load your listings.");
@@ -64,7 +64,7 @@ export default function MyListings() {
         } finally {
             setLoading(false);
         }
-    }, [user, activeTab, authHeaders]);
+    }, [token, activeTab, authHeaders]);
 
     useEffect(() => {
         fetchCounts().catch((err) => console.error("Failed to load counts:", err));
@@ -184,8 +184,8 @@ export default function MyListings() {
                                 <span className="price">{Number(item.price).toFixed(0)} JD</span>
                             )}
                             <span className={`status-pill ${item.status}`}>
-                {item.status === "active" ? "Active" : "Sold"}
-              </span>
+                                {item.status === "active" ? "Active" : "Sold"}
+                            </span>
                         </div>
 
                         <div className="listing-actions">
